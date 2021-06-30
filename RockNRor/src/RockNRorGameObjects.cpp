@@ -153,6 +153,7 @@ void RockNRorGameObjects::ResetObjects() {
 	this->inGameTextHandler.ClearAllText();
 	for (int i = 0; i < 9; i++) {
 		this->bonusInGameTextByPlayerAndUnitDefId[i].clear();
+		this->nonTransmissibleBonusInGameTextByPlayerAndUnitDefId[i].clear();
 	}
 }
 
@@ -366,6 +367,19 @@ long int RockNRorGameObjects::Serialize(FILE *outputFile) const {
 			result += this->WriteBytes(outputFile, &index, sizeof(index));
 		}
 	}
+	// Serialize nonTransmissibleBonusInGameTextByPlayer. Note that "text indexes" are preserved in inGameTextHandler serialization
+	for (int playerId = 0; playerId < 9; playerId++) {
+		size_t elemCount = this->nonTransmissibleBonusInGameTextByPlayerAndUnitDefId[playerId].size();
+		result += this->WriteBytes(outputFile, &elemCount, sizeof(elemCount));
+		for (auto it = this->nonTransmissibleBonusInGameTextByPlayerAndUnitDefId[playerId].cbegin();
+			it != this->nonTransmissibleBonusInGameTextByPlayerAndUnitDefId[playerId].cend();
+			it++) {
+			short int unitDefId = it->first;
+			unsigned long int index = it->second;
+			result += this->WriteBytes(outputFile, &unitDefId, sizeof(unitDefId));
+			result += this->WriteBytes(outputFile, &index, sizeof(index));
+		}
+	}
 
 	result += this->inGameTextHandler.Serialize(outputFile);
 	
@@ -413,6 +427,19 @@ bool RockNRorGameObjects::Deserialize(FILE *inputFile) {
 			this->ReadBytes(inputFile, &unitDefId, sizeof(unitDefId));
 			this->ReadBytes(inputFile, &index, sizeof(index));
 			this->bonusInGameTextByPlayerAndUnitDefId[playerId][unitDefId] = index;
+		}
+	}
+	// Deserialize nonTransmissibleBonusInGameTextByPlayer
+	for (int playerId = 0; playerId < 9; playerId++) {
+		size_t elemCount = 0;
+		this->ReadBytes(inputFile, &elemCount, sizeof(elemCount));
+
+		for (size_t i = 0; i < elemCount; i++) {
+			short int unitDefId = 0;
+			unsigned long int index = 0;
+			this->ReadBytes(inputFile, &unitDefId, sizeof(unitDefId));
+			this->ReadBytes(inputFile, &index, sizeof(index));
+			this->nonTransmissibleBonusInGameTextByPlayerAndUnitDefId[playerId][unitDefId] = index;
 		}
 	}
 

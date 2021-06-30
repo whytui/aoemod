@@ -138,6 +138,8 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 
 		const std::map<GLOBAL_UNIT_AI_TYPES, std::string> bonusTextByClass = ttc.GetBonusTextByClassMap();
 		this->GetCustomPlayerInfo(playerId)->AddCivBonusUnitCustomText(bonusTextByClass);
+		const std::map<GLOBAL_UNIT_AI_TYPES, std::string> nonTransmissibleBonusTextByClass = ttc.GetNonTransmissibleBonusesText();
+		this->GetCustomPlayerInfo(playerId)->AddNonTransmissibleCivBonusCustomText(nonTransmissibleBonusTextByClass);
 	}
 	
 	return true;

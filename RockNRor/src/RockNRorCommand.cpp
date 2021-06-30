@@ -2147,6 +2147,7 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 	ROCKNROR::crInfo.myGameObjects.RemoveAllInfoForUnit(targetUnit->unitInstanceId, targetUnit->positionX, targetUnit->positionY, true);
 
 	// If the unit benefits from a civ bonus, make sure to save this information
+	// Note : does not apply to "non-transmissible" civ bonuses (cf nonTransmissibleBonusInGameTextByPlayerAndUnitDefId)
 	if (targetUnit->DerivesFromTrainable()) {
 		STRUCT_UNIT_TRAINABLE *unitAsTrainable = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)targetUnit;
 		if (!unitAsTrainable->hasDedicatedUnitDef &&

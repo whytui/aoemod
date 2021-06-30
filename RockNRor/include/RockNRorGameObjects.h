@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <list>
 #include <map>
 #include <algorithm>
 #include <assert.h>
@@ -78,6 +79,10 @@ public:
 
 	// Array index = player Id (1-8, ignore 0). Map key=unitDefId, map value=index for "inGameTextHandler" to retrieve unit civ bonus description
 	std::map<short int, unsigned long int> bonusInGameTextByPlayerAndUnitDefId[9];
+	// Array index = player Id (1-8, ignore 0). Map key=unitDefId, map value=index for "inGameTextHandler" to retrieve unit civ bonus description
+	// For bonuses that apply exclusively to a player, not preserved when units are converted (eg priest charging rate, conversion efficiency)
+	// map key might be -1 for bonuses that are not linked to specific units (eg bonus on tribute cost, starting resources, etc)
+	std::map<short int, unsigned long int> nonTransmissibleBonusInGameTextByPlayerAndUnitDefId[9];
 
 	void ResetObjects();
 	void FreeAllUnitCustomInfoList();
@@ -117,9 +122,19 @@ public:
 	bool RemoveProtectedUnit(long int protectedUnitId);
 
 	// Returns true if there is a "civ bonus text information" for the playerId / unitDefId specified
+	// Does not take care of special bonuses (that apply at player level)
 	bool HasUnitDefBonusTextInfo(long int playerId, short int unitDefId) const {
 		if ((playerId < 0) || (playerId > 8)) { return false; }
 		return this->bonusInGameTextByPlayerAndUnitDefId[playerId].find(unitDefId) != this->bonusInGameTextByPlayerAndUnitDefId[playerId].end();
+	}
+
+	// Returns true if there is a "special civ bonus text information" for the playerId / unitDefId specified
+	// Special civ bonuses are non-transmissible ones, such as conversion efficiency
+	// Does not take care of special bonuses (that apply at player level)
+	bool HasNonTransmissibleUnitDefBonusTextInfo(long int playerId, short int unitDefId) const {
+		if ((playerId < 0) || (playerId > 8)) { return false; }
+		return this->nonTransmissibleBonusInGameTextByPlayerAndUnitDefId[playerId].find(unitDefId) !=
+			this->nonTransmissibleBonusInGameTextByPlayerAndUnitDefId[playerId].end();
 	}
 
 	// Serialize object to output stream (file). May throw SerializeException

@@ -74,6 +74,9 @@ public:
 
 	// Adds custom description text to units that benefit from a civ bonus
 	void AddCivBonusUnitCustomText(const std::map<GLOBAL_UNIT_AI_TYPES, std::string> bonusTextByClass);
+
+	// Adds custom description text to players that benefit from special civ bonuses
+	void AddNonTransmissibleCivBonusCustomText(const std::map<GLOBAL_UNIT_AI_TYPES, std::string> nonTransmissibleBonusTextByClass);
 };
 
 
@@ -271,10 +274,15 @@ public:
 	const std::map<GLOBAL_UNIT_AI_TYPES, std::string> GetBonusTextByClassMap() const {
 		return this->bonusTextByClassId;
 	}
+	// Get a list of "special bonuses" texts. Concerns bonuses that apply at player level, such as conversion efficiency.
+	const std::map<GLOBAL_UNIT_AI_TYPES, std::string> GetNonTransmissibleBonusesText() const {
+		return this->nonTransmissibleBonusTextByClassId;
+	}
 
 private:
 	std::string bonusText;
-	std::map<GLOBAL_UNIT_AI_TYPES, std::string> bonusTextByClassId;
+	std::map<GLOBAL_UNIT_AI_TYPES, std::string> bonusTextByClassId; // Bonus "text" by unit class id (if any)
+	std::map<GLOBAL_UNIT_AI_TYPES, std::string> nonTransmissibleBonusTextByClassId; // list of bonus descriptions, for bonuses that apply to a specific player (eg conversion efficiency)
 
 	// Actual number of bonus created for the civilization
 	int bonusCount;

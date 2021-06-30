@@ -196,17 +196,17 @@ void CustomPlayerInfo::AddCivBonusUnitCustomText(const std::map<GLOBAL_UNIT_AI_T
 	if ((this->myPlayerId < 1) || (this->myTechTreeId < 0)) { return; }
 	if (!ROCKNROR::crInfo.configInfo.keepTextDescriptionOfUnitCivBonus) { return; }
 
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global) { return; }
+	AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(this->myPlayerId);
+	if (!player) { return; }
+
 	for (auto elem = bonusTextByClass.cbegin(); elem != bonusTextByClass.cend(); elem++) {
 		GLOBAL_UNIT_AI_TYPES unitClass = elem->first;
 		std::string text = elem->second;
 		
 		unsigned long int textIndex = ROCKNROR::crInfo.myGameObjects.inGameTextHandler.AppendNewText(text);
 		
-		STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
-		if (!global) { return; }
-		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(this->myPlayerId);
-		if (!player) { return; }
-
 		// Create link between (player)unitDefId's and textIndex
 		// Remark : work on "global"/player structures, because "this" (CustomPlayerInfo) may not be fully initialized yet
 		for (int unitDefId = 0; unitDefId < player->structDefUnitArraySize; unitDefId++) {
@@ -218,7 +218,37 @@ void CustomPlayerInfo::AddCivBonusUnitCustomText(const std::map<GLOBAL_UNIT_AI_T
 			}
 		}
 	}
+}
 
+
+// Adds custom description text to players that benefit from special civ bonuses
+void CustomPlayerInfo::AddNonTransmissibleCivBonusCustomText(const std::map<GLOBAL_UNIT_AI_TYPES, std::string> nonTransmissibleBonusTextByClass) {
+	if ((this->myPlayerId < 1) || (this->myTechTreeId < 0)) { return; }
+	if (!ROCKNROR::crInfo.configInfo.keepTextDescriptionOfUnitCivBonus) { return; }
+
+	STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+	if (!global) { return; }
+	AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(this->myPlayerId);
+	if (!player) { return; }
+
+	for (auto elem = nonTransmissibleBonusTextByClass.cbegin(); elem != nonTransmissibleBonusTextByClass.cend(); elem++) {
+		GLOBAL_UNIT_AI_TYPES unitClass = elem->first;
+		std::string text = elem->second;
+
+		unsigned long int textIndex = ROCKNROR::crInfo.myGameObjects.inGameTextHandler.AppendNewText(text);
+
+		// Create link between (player)unitDefId's and textIndex
+		// Remark : work on "global"/player structures, because "this" (CustomPlayerInfo) may not be fully initialized yet
+		for (int unitDefId = 0; unitDefId < player->structDefUnitArraySize; unitDefId++) {
+			if (this->IsUnitDisabled(unitDefId)) { continue; }
+			AOE_STRUCTURES::STRUCT_UNITDEF_BASE *unitDef = player->GetUnitDefBase(unitDefId);
+			if (!unitDef) { continue; }
+			if (unitDef->unitAIType == unitClass) {
+				// Beware: here we are working on "non-transmissible" bonuses...
+				ROCKNROR::crInfo.myGameObjects.nonTransmissibleBonusInGameTextByPlayerAndUnitDefId[this->myPlayerId][unitDef->DAT_ID1] = textIndex;
+			}
+		}
+	}
 }
 
 
@@ -900,6 +930,7 @@ void TechTreeCreator::CalcRandomCivBonus() {
 	int maxBonusCount = avgCount + 2; // force to stop loop when that number of bonuses is reached
 	this->bonusText.clear();
 	this->bonusTextByClassId.clear();
+	this->nonTransmissibleBonusTextByClassId.clear();
 	double bonusWeight = 0;
 
 	// Generate a set of bonuses, until the "bonus weight" reaches the target
@@ -1186,6 +1217,7 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 		}
 	}
 	std::string outputBonusDescription;
+	bool bonusIsNotTransmissible = false; // True for player-dedicated bonuses, eg priest conversion efficiency or charging rate
 
 	// Cases when we apply to restricted units
 	/*COMMENTED because unit upgrades would NOT get bonus !!! if (availableAffectedUnitLines == 1) {
@@ -1316,7 +1348,10 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->bonusText += "% for ";
 			this->bonusText += applyToNameString.c_str();
 			this->bonusText += NEWLINE;
-			// outputBonusDescription : nothing to write, conversion efficiency applies to the PLAYER, not units
+			outputBonusDescription = "Conversion efficiency +";
+			outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
+			outputBonusDescription += "%";
+			bonusIsNotTransmissible = true; // Conversion efficiency applies to the PLAYER, not preserved when units are converted
 		} else {
 			int attackValue = 1;
 			bool useMeleeAttack = isMelee;
@@ -1406,7 +1441,7 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->bonusText += "% for ";
 			this->bonusText += applyToNameString.c_str();
 			this->bonusText += NEWLINE;
-			outputBonusDescription += "speed +";
+			outputBonusDescription = "Speed +";
 			outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
 			outputBonusDescription += "%";
 		} else {
@@ -1419,7 +1454,10 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->bonusText += "% for ";
 			this->bonusText += applyToNameString.c_str();
 			this->bonusText += NEWLINE;
-			// outputBonusDescription : nothing to write, priest recharging speed applies to the PLAYER, not units
+			outputBonusDescription = "Recharging speed +";
+			outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
+			outputBonusDescription += "%";
+			bonusIsNotTransmissible = true; // Priest recharging speed applies to the player, not preserved when units are converted
 		}
 	}
 
@@ -1449,7 +1487,7 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->bonusText += std::to_string(bonusAbsoluteAdd);
 			this->bonusText += ")";
 			this->bonusText += NEWLINE;
-			outputBonusDescription += "food +";
+			outputBonusDescription = "food +";
 			outputBonusDescription += std::to_string(bonusAbsoluteAdd);
 			bonusHasBeenHandled = true;
 		}
@@ -1500,7 +1538,7 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->bonusText += " carry amount for ";
 			this->bonusText += applyToNameString.c_str();
 			this->bonusText += NEWLINE;
-			outputBonusDescription += "carry amount +";
+			outputBonusDescription = "Carry amount +";
 			outputBonusDescription += std::to_string((int)carryCapacityAdd);
 		}
 	}
@@ -1515,12 +1553,18 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 		this->bonusText += "% for class ";
 		this->bonusText += className;
 		this->bonusText += NEWLINE;
-		outputBonusDescription += "cost -";
+		outputBonusDescription = "Cost -";
 		outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
 		outputBonusDescription += "%";
 	}
 
-	this->bonusTextByClassId[bonusUnitClass] = outputBonusDescription; // save the bonus text for further use
+	// Save the bonus text for further use
+	if (bonusIsNotTransmissible) {
+		this->nonTransmissibleBonusTextByClassId[bonusUnitClass] = outputBonusDescription; 
+	}
+	else {
+		this->bonusTextByClassId[bonusUnitClass] = outputBonusDescription;
+	}
 
 	return resultAdditionalWeight;
 }

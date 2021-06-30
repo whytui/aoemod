@@ -366,6 +366,22 @@ void InGameUnitPropertiesPopup::CreateScreenComponents() {
 					linesCount++;
 				}
 			}
+			if (ROCKNROR::crInfo.myGameObjects.HasNonTransmissibleUnitDefBonusTextInfo(unitPlayer->playerId, unitBase->unitDefinition->DAT_ID1)) {
+				// For ANY unit, (non transmissible) player-level bonuses always apply : conversion efficiency, etc
+				// With player-level bonuses, the unit *might* have 2 bonuses (one from native civ, + one for current player)
+				bonusTextIndex = (long int)ROCKNROR::crInfo.myGameObjects.nonTransmissibleBonusInGameTextByPlayerAndUnitDefId[unitPlayer->playerId]
+					[unitBase->unitDefinition->DAT_ID1];
+				if (bonusTextIndex >= 0) {
+					std::string str = ROCKNROR::crInfo.myGameObjects.inGameTextHandler.GetText(bonusTextIndex);
+					if (!str.empty()) {
+						wholeText += "\r\n";
+						wholeText += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_BONUS, "Bonus");
+						wholeText += ": ";
+						wholeText += str;
+						linesCount++;
+					}
+				}
+			}
 		}
 
 		this->AddTextBox(&this->edtStrengthWeakness, wholeText.c_str(), 0, 30, currentYPos, 450, 10 + linesCount * 14, true, true, false, AOE_FONTS::AOE_FONT_SMALL_TEXT_10);
