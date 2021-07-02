@@ -29,7 +29,10 @@ public:
 	}
 
 	std::string lastGenerationSummary;
-	std::list<std::string> lastGenerationBonusLinesForHumanPlayer;
+
+	// Bonus text description (1 line=1 civ bonus) for each player (ignore 0).
+	// Only includes civ bonuses, not disabled unit/techs
+	std::list<std::string> lastGenerationBonusLinesByPlayer[9];
 
 	// Init data for standard games (using standard civs/tech tree)
 	bool CreateInternalDataForGameWithStandardCivs(bool resetInternalData);
@@ -47,9 +50,9 @@ public:
 	// Reset all players data
 	void ResetPlayers() {
 		this->lastGenerationSummary.clear();
-		this->lastGenerationBonusLinesForHumanPlayer.clear();
 		for (int i = 0; i < 9; i++) {
 			this->playersInfo[i].ResetAndInit(i, -1, -1);
+			this->lastGenerationBonusLinesByPlayer[i].clear();
 		}
 	}
 

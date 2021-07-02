@@ -77,6 +77,9 @@ public:
 
 	// Adds custom description text to players that benefit from special civ bonuses
 	void AddNonTransmissibleCivBonusCustomText(const std::map<GLOBAL_UNIT_AI_TYPES, std::string> nonTransmissibleBonusTextByClass);
+
+	// Adds custom civ bonus descriptions to the player
+	void AddCivBonusCustomText(const std::list<std::string> bonusTextLines);
 };
 
 
@@ -253,6 +256,8 @@ public:
 		this->lastAverageBonusWeight = 0;
 		this->expectedAverageDisableWeight = 0;
 		this->bonusCount = 0;
+		this->bonusTextByClassId.clear();
+		this->nonTransmissibleBonusTextByClassId.clear();
 	}
 
 	// Create a random tech tree (list of effects) on provided TechDef (should be initially empty).
@@ -264,7 +269,8 @@ public:
 
 	std::string GetCivBonusText() const;
 
-	std::list<std::string> GetHumanBonusTextLines() const;
+	// Get bonus description texts as a list of strings (only bonuses, not disabled units/techs)
+	std::list<std::string> GetCivBonusTextLines() const;
 
 	// Returns true if there is a "bonus text" for the unit class ID specified
 	inline bool UnitClassHasBonusText(GLOBAL_UNIT_AI_TYPES unitClassId) const {

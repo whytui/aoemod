@@ -252,6 +252,18 @@ void CustomPlayerInfo::AddNonTransmissibleCivBonusCustomText(const std::map<GLOB
 }
 
 
+// Adds custom civ bonus descriptions to the player
+void CustomPlayerInfo::AddCivBonusCustomText(const std::list<std::string> bonusTextLines) {
+	if ((this->myPlayerId < 1) || (this->myTechTreeId < 0)) { return; }
+	if (!ROCKNROR::crInfo.configInfo.keepTextDescriptionOfUnitCivBonus) { return; }
+
+	for (auto it = bonusTextLines.cbegin(); it != bonusTextLines.cend(); it++) {
+		short int textIndex = ROCKNROR::crInfo.myGameObjects.inGameTextHandler.AppendNewText(*it);
+		ROCKNROR::crInfo.myGameObjects.civBonusInGameTextLinesByPlayerId[this->myPlayerId].push_back(textIndex);
+	}
+}
+
+
 // Returns the final "disable probability" for this research.
 // Returns <=0 if the unit must not be disable OR must not be disabled directly (handled by "unit line")
 double TTCreatorResearchInfo::GetDisableProbability() const {
@@ -2057,7 +2069,8 @@ std::string TechTreeCreator::GetCivBonusText() const {
 }
 
 
-std::list<std::string> TechTreeCreator::GetHumanBonusTextLines() const {
+// Get bonus description texts as a list of strings (only bonuses, not disabled units/techs)
+std::list<std::string> TechTreeCreator::GetCivBonusTextLines() const {
 	std::list<std::string> result;
 	std::string curLine = "";
 	for (auto it = this->bonusText.begin(); it != this->bonusText.end(); it++) {

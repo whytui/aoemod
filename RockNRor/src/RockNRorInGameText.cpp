@@ -11,6 +11,7 @@ namespace ROCKNROR {
 	}
 
 
+	// Safely get a text from its textId. Returns an empty string if textId is out of bounds.
 	string InGameTextHandler::GetText(unsigned long int textId) const {
 		if (textId >= this->GetCurrentTextArraySize()) {
 			return string();

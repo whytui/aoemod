@@ -128,9 +128,7 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 		this->lastGenerationSummary += "Civilization bonuses:" NEWLINE;
 		this->lastGenerationSummary += ttc.GetCivBonusText();
 		this->lastGenerationSummary += NEWLINE;
-		if ((global->humanPlayerId >= 0) && (global->humanPlayerId == playerId)) {
-			this->lastGenerationBonusLinesForHumanPlayer = ttc.GetHumanBonusTextLines();
-		}
+		this->lastGenerationBonusLinesByPlayer[playerId] = ttc.GetCivBonusTextLines();
 
 		// Warning : GetCustomPlayerInfo(playerId) has NOT analyzed the tech tree yet
 
@@ -140,6 +138,9 @@ bool CustomCivHandler::CreateFakeRandomCivsForAllPlayers() {
 		this->GetCustomPlayerInfo(playerId)->AddCivBonusUnitCustomText(bonusTextByClass);
 		const std::map<GLOBAL_UNIT_AI_TYPES, std::string> nonTransmissibleBonusTextByClass = ttc.GetNonTransmissibleBonusesText();
 		this->GetCustomPlayerInfo(playerId)->AddNonTransmissibleCivBonusCustomText(nonTransmissibleBonusTextByClass);
+
+		const std::list<std::string> bonusTextLines = ttc.GetCivBonusTextLines();
+		this->GetCustomPlayerInfo(playerId)->AddCivBonusCustomText(bonusTextLines);
 	}
 	
 	return true;

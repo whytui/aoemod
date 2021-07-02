@@ -154,6 +154,7 @@ void RockNRorGameObjects::ResetObjects() {
 	for (int i = 0; i < 9; i++) {
 		this->bonusInGameTextByPlayerAndUnitDefId[i].clear();
 		this->nonTransmissibleBonusInGameTextByPlayerAndUnitDefId[i].clear();
+		this->civBonusInGameTextLinesByPlayerId[i].clear();
 	}
 }
 
@@ -380,6 +381,17 @@ long int RockNRorGameObjects::Serialize(FILE *outputFile) const {
 			result += this->WriteBytes(outputFile, &index, sizeof(index));
 		}
 	}
+	// Serialize civBonusInGameTextLinesByPlayerId. Note that "text indexes" are preserved in inGameTextHandler serialization
+	for (int playerId = 0; playerId < 9; playerId++) {
+		size_t elemCount = this->civBonusInGameTextLinesByPlayerId[playerId].size();
+		result += this->WriteBytes(outputFile, &elemCount, sizeof(elemCount));
+		for (auto it = this->civBonusInGameTextLinesByPlayerId[playerId].cbegin();
+			it != this->civBonusInGameTextLinesByPlayerId[playerId].cend();
+			it++) {
+			short int textIndex = *it;
+			result += this->WriteBytes(outputFile, &textIndex, sizeof(textIndex));
+		}
+	}
 
 	result += this->inGameTextHandler.Serialize(outputFile);
 	
@@ -440,6 +452,17 @@ bool RockNRorGameObjects::Deserialize(FILE *inputFile) {
 			this->ReadBytes(inputFile, &unitDefId, sizeof(unitDefId));
 			this->ReadBytes(inputFile, &index, sizeof(index));
 			this->nonTransmissibleBonusInGameTextByPlayerAndUnitDefId[playerId][unitDefId] = index;
+		}
+	}
+	// Deserialize civBonusInGameTextLinesByPlayerId
+	for (int playerId = 0; playerId < 9; playerId++) {
+		size_t elemCount = 0;
+		this->ReadBytes(inputFile, &elemCount, sizeof(elemCount));
+
+		for (size_t i = 0; i < elemCount; i++) {
+			short int textIndex = 0;
+			this->ReadBytes(inputFile, &textIndex, sizeof(textIndex));
+			this->civBonusInGameTextLinesByPlayerId[playerId].push_back(textIndex);
 		}
 	}
 

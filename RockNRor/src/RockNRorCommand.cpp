@@ -736,6 +736,19 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 		}
 	}
 
+	if (strcmp(command, "civ bonus") == 0) {
+		// Display civilization bonus if using random civ bonus/tech tree
+		STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		if (global && (global->humanPlayerId >= 0) && (global->humanPlayerId < 9)) {
+			auto listForHumanPlayer = ROCKNROR::crInfo.myGameObjects.civBonusInGameTextLinesByPlayerId[global->humanPlayerId];
+			for (auto it = listForHumanPlayer.cbegin(); it != listForHumanPlayer.cend(); it++) {
+				short int textIndex = *it;
+				std::string text = ROCKNROR::crInfo.myGameObjects.inGameTextHandler.GetText(textIndex);
+				AOE_METHODS::CallWriteText(text.c_str());
+			}
+		}
+	}
+
 #ifdef _DEBUG
 	if (strcmp(command, "unit analyze") == 0) {
 		AOE_METHODS::SetGamePause(true);
@@ -1463,12 +1476,14 @@ void RockNRorCommand::OnGameStart() {
 	}
 
 	// Display civilization bonus if using random civ bonus/tech tree
-	if (ROCKNROR::crInfo.configInfo.randomTechTreeForRMGames && !settings->rgeGameOptions.isMultiPlayer &&
-		!settings->rgeGameOptions.isScenario && !settings->isCampaign && !settings->isSavedGame &&
-		!this->customCivHandler.lastGenerationBonusLinesForHumanPlayer.empty()) {
-		for (auto it = this->customCivHandler.lastGenerationBonusLinesForHumanPlayer.begin();
-			it != this->customCivHandler.lastGenerationBonusLinesForHumanPlayer.end(); it++) {
-			AOE_METHODS::CallWriteText((*it).c_str());
+	if (global && (global->humanPlayerId >= 0) && (global->humanPlayerId < 9) && !settings->rgeGameOptions.isMultiPlayer &&
+		!settings->rgeGameOptions.isScenario && !settings->isCampaign && !settings->isSavedGame
+		) {
+		auto listForHumanPlayer = ROCKNROR::crInfo.myGameObjects.civBonusInGameTextLinesByPlayerId[global->humanPlayerId];
+		for (auto it = listForHumanPlayer.cbegin(); it != listForHumanPlayer.cend(); it++) {
+			short int textIndex = *it;
+			std::string text = ROCKNROR::crInfo.myGameObjects.inGameTextHandler.GetText(textIndex);
+			AOE_METHODS::CallWriteText(text.c_str());
 		}
 	}
 

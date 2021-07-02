@@ -21,7 +21,7 @@ public:
 		return this->textArray.size();
 	}
 
-	// Get a text from its ID
+	// Safely get a text from its textId. Returns an empty string if textId is out of bounds.
 	string GetText(unsigned long int textId) const;
 	/*string GetText(int textId) const {
 		if (textId < 0) { return string(); }

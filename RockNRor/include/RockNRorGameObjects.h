@@ -84,6 +84,10 @@ public:
 	// map key might be -1 for bonuses that are not linked to specific units (eg bonus on tribute cost, starting resources, etc)
 	std::map<short int, unsigned long int> nonTransmissibleBonusInGameTextByPlayerAndUnitDefId[9];
 
+	// Array index = playerId (1-8, ignore 0). Each element is a (list of indexes for inGameTextHandler)
+	// Representing the civ bonus description (1 entry = 1 line = 1 civ bonus)
+	std::list<short int> civBonusInGameTextLinesByPlayerId[9];
+
 	void ResetObjects();
 	void FreeAllUnitCustomInfoList();
 	void FreeAllFarmRebuildInfoList();
