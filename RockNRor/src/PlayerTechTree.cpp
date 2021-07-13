@@ -1453,7 +1453,7 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->bonusText += "% for ";
 			this->bonusText += applyToNameString.c_str();
 			this->bonusText += NEWLINE;
-			outputBonusDescription = "Speed +";
+			outputBonusDescription = "Attack speed +";
 			outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
 			outputBonusDescription += "%";
 		} else {
