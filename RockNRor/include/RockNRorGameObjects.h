@@ -32,6 +32,7 @@ public:
 	long int protectUnitId;
 	long int myMainBuilderId; // unitId of "main" villager builder, that will have priority on others for next action (farming when farm is built...). -1=N/A (most cases).
 	long int bonusTextIndex; // -1 means "not set" (empty). If >=0, determines the index in InGameTextHandler to retrieve the civ bonus info
+	int creatorPlayerId; // ID of the player that initially created the unit. Informative only. -1=unknown, or 0-8 otherwise
 
 	// Returns true if object contains no relevant information and can be removed. (all values are set to "none" or default)
 	bool CanBeRemoved() const;
@@ -39,6 +40,7 @@ public:
 	bool HasValidProtectInfo() const;
 	void ResetSpawnAutoTargetInfo();
 	void ResetProtectInfo();
+	int SetCreatorIfUnknown(int playerId); // Sets creatorPlayerId unless it's already valued.
 
 	// Serialize object to output stream (file). May throw SerializeException
 	long int Serialize(FILE *outputFile) const override;

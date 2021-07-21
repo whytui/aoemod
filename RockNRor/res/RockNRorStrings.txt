@@ -259,6 +259,8 @@ Recharging rate
 Healing rate bonus
 [42177] // Unit properties: "Bonus" term
 Bonus
+[42178] // Unit properties: "Creator p#" header to display playerID that created a unit
+Creator : p#
 
 // *** Scenario editor ***
 [42063]

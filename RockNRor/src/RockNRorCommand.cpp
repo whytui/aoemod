@@ -2165,15 +2165,19 @@ void RockNRorCommand::OnUnitChangeOwner_fixes(AOE_STRUCTURES::STRUCT_UNIT_BASE *
 	// Note : does not apply to "non-transmissible" civ bonuses (cf nonTransmissibleBonusInGameTextByPlayerAndUnitDefId)
 	if (targetUnit->DerivesFromTrainable()) {
 		STRUCT_UNIT_TRAINABLE *unitAsTrainable = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE*)targetUnit;
-		if (!unitAsTrainable->hasDedicatedUnitDef &&
-			ROCKNROR::crInfo.myGameObjects.HasUnitDefBonusTextInfo(targetPlayer->playerId, targetUnit->unitDefinition->DAT_ID1)) {
-			int bonusTextIndex = ROCKNROR::crInfo.myGameObjects.bonusInGameTextByPlayerAndUnitDefId[targetPlayer->playerId]
-				[targetUnit->unitDefinition->DAT_ID1];
-			if (bonusTextIndex >= 0) {
-				UnitCustomInfo *info = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(targetUnit->unitInstanceId);
-				if (info && (info->bonusTextIndex < 0)) { // Do not overwrite if there is already some text
-					info->bonusTextIndex = bonusTextIndex;
+		if (!unitAsTrainable->hasDedicatedUnitDef) {
+			UnitCustomInfo *info = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(targetUnit->unitInstanceId);
+			if (ROCKNROR::crInfo.myGameObjects.HasUnitDefBonusTextInfo(targetPlayer->playerId, targetUnit->unitDefinition->DAT_ID1)) {
+				int bonusTextIndex = ROCKNROR::crInfo.myGameObjects.bonusInGameTextByPlayerAndUnitDefId[targetPlayer->playerId]
+					[targetUnit->unitDefinition->DAT_ID1];
+				if (bonusTextIndex >= 0) {
+					if (info && (info->bonusTextIndex < 0)) { // Do not overwrite if there is already some text
+						info->bonusTextIndex = bonusTextIndex;
+					}
 				}
+			}
+			if (info) {
+				info->SetCreatorIfUnknown(targetPlayer->playerId);
 			}
 		}
 	}
@@ -3564,8 +3568,13 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 		}
 	}
 	// No additional actions when viewing a unit that is not mine !
-	if (!panelUnitBase || !player || !player->IsCheckSumValid() || (player != GetControlledPlayerStruct_Settings())) {
+	if (!panelUnitBase || !panelUnitBase->unitDefinition || !player || !player->IsCheckSumValid() ||
+		(player != GetControlledPlayerStruct_Settings())) {
 		return false;
+	}
+	AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *panelUnitTrainable = NULL;
+	if (panelUnitBase->DerivesFromTrainable()) {
+		panelUnitTrainable = (AOE_STRUCTURES::STRUCT_UNIT_TRAINABLE *)panelUnitBase;
 	}
 
 	if ((uiCommandId == AOE_CONST_INTERNAL::INGAME_UI_COMMAND_ID::CST_IUC_CANCEL_SELECTION) ||
@@ -3636,6 +3645,9 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 		UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackVillagers = false;
+		if (!panelUnitTrainable->hasDedicatedUnitDef) {
+			unitInfo->SetCreatorIfUnknown(player->playerId);
+		}
 		flagsToApply.attackVillagers = true; // this flag has been updated
 		BUTTONBAR::RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
 		updateAutoAttackInfo = true;
@@ -3644,6 +3656,9 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 		UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = true;
 		unitInfo->autoAttackPolicy.attackNonTowerBuildings = false;
+		if (!panelUnitTrainable->hasDedicatedUnitDef) {
+			unitInfo->SetCreatorIfUnknown(player->playerId);
+		}
 		flagsToApply.attackNonTowerBuildings = true; // this flag has been updated
 		BUTTONBAR::RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
 		updateAutoAttackInfo = true;
@@ -3655,6 +3670,9 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 		unitInfo->autoAttackPolicy.attackNonTowerBuildings = false;
 		unitInfo->autoAttackPolicy.attackVillagers = false;
 		unitInfo->autoAttackPolicy.attackTowers = false;
+		if (!panelUnitTrainable->hasDedicatedUnitDef) {
+			unitInfo->SetCreatorIfUnknown(player->playerId);
+		}
 		flagsToApply.attackMilitary = true; // this flag has been updated
 		flagsToApply.attackNonTowerBuildings = true; // this flag has been updated
 		flagsToApply.attackVillagers = true; // this flag has been updated
@@ -3666,6 +3684,9 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 		UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
 		unitInfo->autoAttackPolicyIsSet = false;
 		unitInfo->autoAttackPolicy.SetDefaultValues();
+		if (!panelUnitTrainable->hasDedicatedUnitDef) {
+			unitInfo->SetCreatorIfUnknown(player->playerId);
+		}
 		flagsToApply.SetAllValues(true); // All flags have been updated.
 		ROCKNROR::crInfo.myGameObjects.RemoveUnitCustomInfoIfEmpty(panelUnitBase->unitInstanceId);
 		BUTTONBAR::RefreshCustomAutoAttackButtons(gameMainUI, &unitInfo->autoAttackPolicy);
@@ -3673,7 +3694,10 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 	}
 	// Apply changes on ALL compatible selected units
 	if (updateAutoAttackInfo) {
-		UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(panelUnitBase->unitInstanceId);
+		UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindOrAddUnitCustomInfo(panelUnitBase->unitInstanceId);
+		if (!panelUnitTrainable->hasDedicatedUnitDef) {
+			unitInfo->SetCreatorIfUnknown(player->playerId);
+		}
 		assert(unitInfo != NULL); // Was just added
 		if (!unitInfo) { return false; } // this is an error case
 		ROCKNROR::crInfo.ApplyAutoAttackPolicyToPlayerSelectedUnits(player, unitInfo->autoAttackPolicy, flagsToApply);
@@ -3689,6 +3713,7 @@ bool RockNRorCommand::OnGameCommandButtonClick(AOE_STRUCTURES::STRUCT_UI_IN_GAME
 			if (settings->ptrGameUIStruct && settings->ptrGameUIStruct->gamePlayUIZone) {
 				UnitCustomInfo *unitInfo = ROCKNROR::crInfo.myGameObjects.FindUnitCustomInfo(panelUnitBase->unitInstanceId);
 				if (unitInfo && (unitInfo->protectUnitId > -1)) {
+					// If a "protect" order already exists, show it in the UI (=> blink target object)
 					AOE_METHODS::DisplayGreenBlinkingOnUnit(settings->ptrGameUIStruct->gamePlayUIZone, unitInfo->protectUnitId, 1000);
 				}
 			}

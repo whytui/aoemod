@@ -173,6 +173,7 @@ const static unsigned long int CRLANG_ID_UNITPROP_CONVERSION_EFFICIENCY = 42174;
 const static unsigned long int CRLANG_ID_UNITPROP_CONVERSION_RECHARGING_RATE = 42175;
 const static unsigned long int CRLANG_ID_UNITPROP_HEALING_RATE_BONUS = 42176;
 const static unsigned long int CRLANG_ID_UNITPROP_BONUS = 42177;
+const static unsigned long int CRLANG_ID_UNITPROP_CREATOR = 42178;
 
 // Scenario editor
 const static unsigned long int CRLANG_IDCUSTOM_EDITOR_MENU = 42063;

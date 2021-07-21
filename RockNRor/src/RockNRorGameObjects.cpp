@@ -11,6 +11,7 @@ UnitCustomInfo::UnitCustomInfo() {
 	this->ResetProtectInfo();
 	this->myMainBuilderId = -1;
 	this->bonusTextIndex = -1;
+	this->creatorPlayerId = -1;
 }
 
 // Returns true if object contains no relevant information and can be removed. (all values are set to "none" or default)
@@ -62,6 +63,16 @@ void UnitCustomInfo::ResetProtectInfo() {
 }
 
 
+// Sets creatorPlayerId unless it's already valued.
+int UnitCustomInfo::SetCreatorIfUnknown(int playerId) {
+	if (this->creatorPlayerId < 0) {
+		assert(playerId <= 8);
+		this->creatorPlayerId = playerId;
+	}
+	return this->creatorPlayerId;
+}
+
+
 // Serialize object to output stream (file). May throw SerializeException
 long int UnitCustomInfo::Serialize(FILE *outputFile) const {
 	long int result = 0;
@@ -76,6 +87,7 @@ long int UnitCustomInfo::Serialize(FILE *outputFile) const {
 	result += this->WriteBytes(outputFile, &this->spawnUnitMoveToPosY, sizeof(this->spawnUnitMoveToPosY));
 	result += this->WriteBytes(outputFile, &this->unitId, sizeof(this->unitId));
 	result += this->WriteBytes(outputFile, &this->bonusTextIndex, sizeof(this->bonusTextIndex));
+	result += this->WriteBytes(outputFile, &this->creatorPlayerId, sizeof(this->creatorPlayerId));
 	return result;
 }
 
@@ -92,6 +104,7 @@ bool UnitCustomInfo::Deserialize(FILE *inputFile) {
 	this->ReadBytes(inputFile, &this->spawnUnitMoveToPosY, sizeof(this->spawnUnitMoveToPosY));
 	this->ReadBytes(inputFile, &this->unitId, sizeof(this->unitId));
 	this->ReadBytes(inputFile, &this->bonusTextIndex, sizeof(this->bonusTextIndex));
+	this->ReadBytes(inputFile, &this->creatorPlayerId, sizeof(this->creatorPlayerId));
 	return true;
 }
 

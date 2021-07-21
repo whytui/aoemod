@@ -258,7 +258,7 @@ void CustomPlayerInfo::AddCivBonusCustomText(const std::list<std::string> bonusT
 	if (!ROCKNROR::crInfo.configInfo.keepTextDescriptionOfUnitCivBonus) { return; }
 
 	for (auto it = bonusTextLines.cbegin(); it != bonusTextLines.cend(); it++) {
-		short int textIndex = ROCKNROR::crInfo.myGameObjects.inGameTextHandler.AppendNewText(*it);
+		short int textIndex = (short int)ROCKNROR::crInfo.myGameObjects.inGameTextHandler.AppendNewText(*it);
 		ROCKNROR::crInfo.myGameObjects.civBonusInGameTextLinesByPlayerId[this->myPlayerId].push_back(textIndex);
 	}
 }

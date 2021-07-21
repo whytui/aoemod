@@ -384,6 +384,13 @@ void InGameUnitPropertiesPopup::CreateScreenComponents() {
 			}
 		}
 
+		if (unitInfo && (unitInfo->creatorPlayerId >= 0)) {
+			wholeText += "\r\n";
+			wholeText += localizationHandler.GetTranslation(CRLANG_ID_UNITPROP_CREATOR, "Creator : p#");
+			wholeText += std::to_string(unitInfo->creatorPlayerId);
+			linesCount++;
+		}
+
 		this->AddTextBox(&this->edtStrengthWeakness, wholeText.c_str(), 0, 30, currentYPos, 450, 10 + linesCount * 14, true, true, false, AOE_FONTS::AOE_FONT_SMALL_TEXT_10);
 		currentYPos += 14 + linesCount * 14;
 	}
