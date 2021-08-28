@@ -1001,6 +1001,20 @@ void RockNRorCommand::UpdateTechAddWorkRateWithMessage(short int techId, short i
 }
 
 
+// This is called during GameSettings Setup handling (after GameSettingsBase.setup, after opening DRS files)
+void RockNRorCommand::OnGameSettingsSetup() {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = GetGameSettingsPtr();
+	assert(settings && settings->IsCheckSumValid());
+	if (!settings || !settings->IsCheckSumValid()) {
+		return;
+	}
+	if (settings->commandLineInfo && ROCKNROR::crInfo.configInfo.disableMusic) {
+		// To disable music at startup (prevents from reading the CD in physical device...)
+		settings->commandLineInfo->enableMusic = 0;
+	}
+}
+
+
 // This is called just after empires.dat is loaded.
 // Warning: any change done here is applied on civ definitions are done once and for all, and impact all games.
 void RockNRorCommand::OnAfterLoadEmpires_DAT() {

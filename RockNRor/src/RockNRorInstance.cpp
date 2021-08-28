@@ -545,6 +545,10 @@ void RockNRorInstance::OnInitGameSettingsAfterLoadDrs(REG_BACKUP *REG_values) {
 		ROCKNROR::crCommand.PatchExeForDrsScreenResolution(settings);
 	}
 
+	if (settings && settings->IsCheckSumValid() && !ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
+		ROCKNROR::crCommand.OnGameSettingsSetup();
+	}
+
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		long int callAddr = 0x4166B0; // gameSettingsBase.setup()
 		_asm {

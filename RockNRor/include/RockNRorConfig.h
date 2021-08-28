@@ -122,6 +122,7 @@ public:
 	bool forceMPCompatibility; // If true, try to protect MP games from sync errors from RockNRor treatements ; some features might be restricted/disabled.
 	// Technical
 	bool autoFixMissingFeatures;
+	bool disableMusic; // If true, disable music - same effect as NOMUSIC command-line argument in vanilla AOE/ROR
 	// If set (not recommended), all (...most) "generic" fixes (fixes without a specific config to enable/disable) won't be applied. Can be used for troubleshooting.
 	bool doNotApplyFixes;
 	bool doNotUpdateVirtualMethods; // default=false. Can be used for trobleshooting.

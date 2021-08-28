@@ -33,6 +33,7 @@
 	<allyExplorationIsAlwaysShared enable="0"/><!-- NOT applied to scenario/campaigns -->
 	<populationLimit value="50"/><!-- Maximum population for single player games. -->
 	<maxAgeInRandomGames value="-1"/><!-- Maximum allowed age in RM/DM games. -1=no limit, 0=stone 1=tool 2=bronze 3=iron -->
+	<noMusic value="0"/><!-- If 1, disables music at startup (prevents from reading the CD physical device), cf NOMUSIC command-line argument -->
 	
 	<!-- improvedButtonBar: Bool 0/1 to use enhanced button bar (show future researches/unit available in tech tree, 
 	Handle more than 1 page of buttons... -->

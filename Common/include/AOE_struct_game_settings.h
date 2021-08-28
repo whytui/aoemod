@@ -265,7 +265,7 @@ namespace AOE_STRUCTURES {
 		STRUCT_UI_DRAW_AREA *renderArea; // +4C. basegame ?? Ptr to struct size>=478. Corresponds to TDrawSystem+0x0C
 		GAME_UNITS_OUTLINE_MODE outline; // +50. Values 0-3. to test
 		char unknown_051[3];
-		unsigned long int unknown_054;
+		long int customMousePointer; // +54. Set to 0 if NORMALMOUSE command-line argument is provided.
 		long int infoSLPCount; // +58. Number of elements in ptrInfosSLP array.
 		STRUCT_SLP_INFO **ptrInfosSLP; // +5C. Pointer to array slpInfo, default size=3. index 0=shortcut numbers, 1=MoveStepFlag, 2=move red cross, see AoeInGameFlagsIconId
 		// 0x60

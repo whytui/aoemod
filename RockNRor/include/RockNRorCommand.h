@@ -145,6 +145,8 @@ public:
 	bool ExecuteCommand(char *command, std::string &output);
 	void HandleChatCommand(char *command);
 
+	// This is called during GameSettings Setup handling (after GameSettingsBase.setup, after opening DRS files)
+	void OnGameSettingsSetup();
 
 	// This is called just after empires.dat is loaded.
 	// Warning: changes here are applied on civ definitions are done once and for all, and impact all games.

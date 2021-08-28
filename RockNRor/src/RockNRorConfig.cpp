@@ -17,6 +17,7 @@ RockNRorConfig::RockNRorConfig() {
 	// Hardcoded initialization (default values). If values are provided in config XML file, it will overload this.
 	this->doNotApplyFixes = false;
 	this->doNotUpdateVirtualMethods = false;
+	this->disableMusic = false;
 	this->forceMPCompatibility = false;
 	this->autoFixMissingFeatures = false;
 	this->autoDetectDrsScreenSizeSlpID = 0; // Game default (disabled)
@@ -476,6 +477,9 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 				}
 				this->maxAgeRM_DM = intValue;
 			}
+		}
+		if (elemName == "noMusic") {
+			this->disableMusic = XML_GetBoolElement(elem, "value");
 		}
 		if (elemName == "improvedButtonBar") {
 			this->useImprovedButtonBar = XML_GetBoolElement(elem, "enable");

@@ -36,16 +36,16 @@ namespace AOE_STRUCTURES {
 		char unknown_418_registry[0x100]; // +418. Registry path ?
 		char unknown_518[0x890 - 0x518]; // +518. Command-line arguments string ?
 		// 0x890
-		long int noStartupFlag; // NOSTARTUP command line flag
+		long int noStartupFlag; // NOSTARTUP command line flag (to prevent running intro video "logo1")
 		unsigned long int unknown_894;
 		unsigned long int unknown_898;
-		unsigned long int unknown_89C;
+		unsigned long int unknown_89C; // Something to do with music ?
 		long int systemMemoryFlag; // SYSTEMMEMORY command line flag
-		long int noMusicFlag; // +8A4. NOMUSIC command line flag ?
-		long int noSoundFlag; // +8A8. NOSOUND command line flag
+		long int enableMusic; // +8A4. Set to 0 if NOMUSIC/NO_MUSIC/NO MUSIC command line flag is set.
+		long int enableSound; // +8A8. Set to 0 if NOSOUND/NO_SOUND/NO SOUND command line flag is set.
 		long int isAudioCD; // +8AC. No Autodetect (force). To confirm
 		unsigned long int unknown_8B0; // MIDI related ?
-		long int isMidiMusic; // +8B4. Force midi. To confirm
+		long int isMidiMusic; // +8B4. Set to 1 if MIDIMUSIC/MIDI_MUSIC/MIDI MUSIC command line flag is set. Cf 0x417CD5.
 		unsigned long int unknown_8B8; // MIDI related ?
 		unsigned long int unknown_8BC;
 		unsigned long int unknown_8C0;
