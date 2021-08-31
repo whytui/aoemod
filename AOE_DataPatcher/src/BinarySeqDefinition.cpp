@@ -353,16 +353,23 @@ BinarySeqDefSet::BinarySeqDefSet(int count) {
 
 
 BinarySeqDefSet::~BinarySeqDefSet() {
-	for (int i = 0; i < this->seqDefListCount; i++) {
-		if (this->seqDefList[i]) {
-			delete this->seqDefList[i];
-			this->seqDefList[i] = NULL;
-		} else {
-			printf("This shouldnt happen\n");
+	if (this->seqDefList) {
+		for (int i = 0; i < this->seqDefListCount; i++) {
+			if (this->seqDefList[i]) {
+				delete this->seqDefList[i];
+				this->seqDefList[i] = NULL;
+			}
+			else {
+				printf("This shouldnt happen\n");
+			}
 		}
+	}
+	else {
+		// This case can happen for empty BinarySeqDefSet (GetCount has not been called, or not successfully)
 	}
 	free(this->seqDefList);
 	this->seqDefList = NULL;
+	this->seqDefListCount = 0;
 	free(this->userSelection);
 	this->userSelection = NULL;
 	free(this->userVarValue);

@@ -250,7 +250,7 @@ private:
 
 /* This class represents a set of BinarySeqDefinition.
  * Just provide the number of BinarySeqDefinition with SetCount, then every memory allocation is managed automatically (freed in destructor)
- * Each element is an independant BinarySeqDefinition : with its own offset, its own number of possible sequences, etc
+ * Each element is an independent BinarySeqDefinition : with its own offset, its own number of possible sequences, etc
  */
 class BinarySeqDefSet
 {

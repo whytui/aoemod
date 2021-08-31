@@ -16,7 +16,7 @@
 namespace ROCKNROR {
 namespace PATCHER {
 
-static AOE_binData aoeBinData;
+extern AOE_binData aoeBinData;
 
 // Returns false if sequences are not installed or if an error occurs.
 bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix);

@@ -3,6 +3,8 @@
 namespace ROCKNROR {
 namespace PATCHER {
 
+AOE_binData aoeBinData;
+
 bool CheckRorApiSequencesAreInstalled(FILE *logFile, bool autoFix) {
 	try {
 		if (autoFix) {
