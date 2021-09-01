@@ -106,6 +106,8 @@ void CallWriteText(const char *txt) {
 	long int writeFct = 0x480760; // DisplayChatTextOnNextLine
 	AOE_STRUCTURES::STRUCT_UI_IN_GAME_MAIN *gameMain = settings->ptrGameUIStruct;
 	if (!gameMain) { return; }
+	assert(gameMain->IsCheckSumValid());
+	if (!gameMain->IsCheckSumValid()) { return; }
 	_asm {
 		push addr;
 		MOV ECX, gameMain;

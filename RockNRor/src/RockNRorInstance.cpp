@@ -2971,6 +2971,19 @@ void RockNRorInstance::OnTextBoxKeyPress(REG_BACKUP *REG_values) {
 // Called to create units from a scenario file (scenario editor or play scenario)
 // NOT called when loading a saved game, never called in-game, never called when creating units in scenario editor.
 void RockNRorInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
+	// This entry point can be called in 2 situations:
+	// 1/ normal case, just after unitBld.build(...) + MOV EAX, EDI (in which case EAX and EDI should both be non-null, and point to unit object)
+	// 2/ error case, JUMP (from 0x4AD7B0) when the unit definition was not found for the player (in which case EAX is null, after the XOR command)
+	bool errorUnitDefNotFound = (REG_values->EAX_val == 0);
+	long int unitDatId = (REG_values->ESI_val / 4); // Fortunately, in both use cases, ESI always equals "DATID*4" cf 0x4EFE7F
+	
+	if (errorUnitDefNotFound) {
+		std::string msg = "An error occurred while reading file data, UNIT DEFINITION ID not found : ";
+		msg += std::to_string(unitDatId);
+		traceMessageHandler.WriteMessage(msg.c_str());
+		return;
+	}
+
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *unit = (AOE_STRUCTURES::STRUCT_UNIT_BASE *)REG_values->EDI_val;
 	ror_api_assert(REG_values, unit != NULL);
 	REG_values->fixesForGameEXECompatibilityAreDone = true; // there is nothing to do for compatibility (CALL ROR_API is added instead of NOPs)
