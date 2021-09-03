@@ -516,7 +516,7 @@ std::string crTrigger::GetParameterPropertyLine(const TRIGGER_KWID_PARAMS paramI
 			return GetPropertyLine<float>(paramIndex, this->GetParameterValue(paramIndex, (float)0));
 			break;
 		case TRIGGER_PARAM_TYPE::TPT_STRING:
-			return GetPropertyLine(paramIndex, this->GetParameterValue(paramIndex, NULL));
+			return GetPropertyLine(paramIndex, this->GetParameterValue(paramIndex, (char*)NULL));
 			break;
 		default:
 			break;
