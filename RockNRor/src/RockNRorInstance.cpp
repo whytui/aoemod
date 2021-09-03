@@ -2976,10 +2976,14 @@ void RockNRorInstance::PlayerCreateUnit_manageStatus(REG_BACKUP *REG_values) {
 	// 2/ error case, JUMP (from 0x4AD7B0) when the unit definition was not found for the player (in which case EAX is null, after the XOR command)
 	bool errorUnitDefNotFound = (REG_values->EAX_val == 0);
 	long int unitDatId = (REG_values->ESI_val / 4); // Fortunately, in both use cases, ESI always equals "DATID*4" cf 0x4EFE7F
+	AOE_STRUCTURES::STRUCT_PLAYER *player = (AOE_STRUCTURES::STRUCT_PLAYER *)REG_values->EBP_val; // Always valid too (in both use cases)
+	ror_api_assert(REG_values, player && player->IsCheckSumValid());
 	
 	if (errorUnitDefNotFound) {
 		std::string msg = "An error occurred while reading file data, UNIT DEFINITION ID not found : ";
 		msg += std::to_string(unitDatId);
+		msg += " ; player #";
+		msg += std::to_string(player->playerId);
 		traceMessageHandler.WriteMessage(msg.c_str());
 		return;
 	}
