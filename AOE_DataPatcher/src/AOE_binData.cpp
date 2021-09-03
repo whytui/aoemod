@@ -100,7 +100,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
-#define COUNT_ROR_API_10c 145
+#define COUNT_ROR_API_10c 146
 #define COUNT_manageAI_10c 13
 #define COUNT_audio_video_10c 9
 #define COUNT_larger_maps_10c 38
@@ -4203,7 +4203,7 @@ void AOE_binData::InitROR_API_10c() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
-		API_onGameStart,
+		obsolete_API_onGameStart,
 		"Call API at game start. Do not enable this if you don't have ROR_API.dll.",
 		0x102A32,
 		(0x81, 0xC4, 0x00, 0x01, 0x00, 0x00, 0xC2, 0x04, 0x00, 0x90, 0x90, 0x90, 0x90, 0x90, 0x53, 0x55), // default=no
@@ -4213,7 +4213,7 @@ void AOE_binData::InitROR_API_10c() {
 		);
 
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
-		API_onGameStart_Load,
+		obsolete_API_onGameStart_Load,
 		"Call API at game start (load game). Do not enable this if you don't have ROR_API.dll.",
 		0x103049,
 		(0x81, 0xC4, 0x04, 0x01, 0x00, 0x00, 0xC2, 0x04, 0x00, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90), // default=no
@@ -5586,6 +5586,16 @@ void AOE_binData::InitROR_API_10c() {
 		0xFE820,
 		(0x8B, 0xCE, 0xE8, 0x89, 0x7E, 0xF1, 0xFF, 0x85, 0xC0),
 		(0x8B, 0xCE, 0xE8, 0x4D, 0xAD, 0xF1, 0xFF, 0x85, 0xC0),
+		FM_OFF,
+		FM_ON
+	);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_10c.GetBinSeqDefinition(i),
+		OnLetGameStart,
+		"Entry point when actually starting game (game screen loaded and ready)",
+		0x104DBC,
+		(0x8B, 0xCD, 0xE8, 0xFD, 0x6F, 0xF1, 0xFF, 0x5E),
+		(0x8B, 0xCD, 0xE8, 0xB1, 0x47, 0xF1, 0xFF, 0x5E),
 		FM_OFF,
 		FM_ON
 	);

@@ -1474,37 +1474,34 @@ void RockNRorCommand::OnGameStart() {
 	ROCKNROR::TRIGGER::ManageTriggerDisableUnitsForExceptions();
 
 	AOE_STRUCTURES::STRUCT_UI_EASY_PANEL *currentPanel = AOE_STRUCTURES::GetCurrentScreen();
-	if (currentPanel && (currentPanel->checksum != CHECKSUM_UI_IN_GAME_MAIN)) {
-		// This is NOT game screen, do not try to interact with it !
-		return;
-	}
-
-	// REQUIRES game UI to be active
-	if (!ROCKNROR::crInfo.configInfo.hideWelcomeMessage && !settings->rgeGameOptions.isMultiPlayer) {
-		std::string msg = localizationHandler.GetTranslation(CRLANG_ID_WELCOME1, "Welcome. " MOD_NAME);
-		msg += " "; 
-		msg += VER_FILE_VERSION_STR;
-		msg += " ";
-		msg += localizationHandler.GetTranslation(CRLANG_ID_WELCOME2, "plugin is active.");
-		AOE_METHODS::CallWriteText(msg.c_str());
-	}
-
-	// Display civilization bonus if using random civ bonus/tech tree
-	if (global && (global->humanPlayerId >= 0) && (global->humanPlayerId < 9) && !settings->rgeGameOptions.isMultiPlayer &&
-		!settings->rgeGameOptions.isScenario && !settings->isCampaign && !settings->isSavedGame
-		) {
-		auto listForHumanPlayer = ROCKNROR::crInfo.myGameObjects.civBonusInGameTextLinesByPlayerId[global->humanPlayerId];
-		for (auto it = listForHumanPlayer.cbegin(); it != listForHumanPlayer.cend(); it++) {
-			short int textIndex = *it;
-			std::string text = ROCKNROR::crInfo.myGameObjects.inGameTextHandler.GetText(textIndex);
-			AOE_METHODS::CallWriteText(text.c_str());
+	if (currentPanel && (currentPanel->checksum == CHECKSUM_UI_IN_GAME_MAIN)) {
+		// REQUIRES game UI to be active
+		if (!ROCKNROR::crInfo.configInfo.hideWelcomeMessage && !settings->rgeGameOptions.isMultiPlayer) {
+			std::string msg = localizationHandler.GetTranslation(CRLANG_ID_WELCOME1, "Welcome. " MOD_NAME);
+			msg += " ";
+			msg += VER_FILE_VERSION_STR;
+			msg += " ";
+			msg += localizationHandler.GetTranslation(CRLANG_ID_WELCOME2, "plugin is active.");
+			AOE_METHODS::CallWriteText(msg.c_str());
 		}
-	}
 
-	// Show automatically "F11" information at game startup
-	if (!settings->rgeGameOptions.isMultiPlayer) {
-		AOE_METHODS::UI_BASE::ShowF11_zone();
-		AOE_METHODS::ShowScores(true);
+		// Display civilization bonus if using random civ bonus/tech tree
+		if (global && (global->humanPlayerId >= 0) && (global->humanPlayerId < 9) && !settings->rgeGameOptions.isMultiPlayer &&
+			!settings->rgeGameOptions.isScenario && !settings->isCampaign && !settings->isSavedGame
+			) {
+			auto listForHumanPlayer = ROCKNROR::crInfo.myGameObjects.civBonusInGameTextLinesByPlayerId[global->humanPlayerId];
+			for (auto it = listForHumanPlayer.cbegin(); it != listForHumanPlayer.cend(); it++) {
+				short int textIndex = *it;
+				std::string text = ROCKNROR::crInfo.myGameObjects.inGameTextHandler.GetText(textIndex);
+				AOE_METHODS::CallWriteText(text.c_str());
+			}
+		}
+
+		// Show automatically "F11" information at game startup
+		if (!settings->rgeGameOptions.isMultiPlayer) {
+			AOE_METHODS::UI_BASE::ShowF11_zone();
+			AOE_METHODS::ShowScores(true);
+		}
 	}
 
 	// Force shared exploration => always ON (if config says so and not in MP)

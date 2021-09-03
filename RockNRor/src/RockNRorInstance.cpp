@@ -52,6 +52,10 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 		break;
 	case 0x00502A3D: // new game start/restart, including scenario
 	case 0x00503054: // game start/restart from a saved game
+		// OLD entry point for game start, do not use
+		// Note : in this entry point, we might still be in "scenario instructions" screen (and game screen is not ready yet)
+		break;
+	case 0x00504DC3:
 		this->ActionOnGameStart(REG_values);
 		break;
 	case 0x0051D50E: // "standard" new game init
@@ -624,9 +628,21 @@ void RockNRorInstance::ReadTextFromChat(REG_BACKUP *REG_values) {
 
 
 // Do some action each time a game starts, including "load game", scenario, campaign and also MP games.
-// Warning: for scenarios, if there is an introduction screen, this method is called at that moment
-// (game might not be displayed yet)
+// This is called after scenario video/introduction screen, if any
+// Game screen is created and already ddisplayed, game chat system has been cleared and is ready too
 void RockNRorInstance::ActionOnGameStart(REG_BACKUP *REG_values) {
+	AOE_STRUCTURES::STRUCT_GAME_SETTINGS *settings = (AOE_STRUCTURES::STRUCT_GAME_SETTINGS *)REG_values->ECX_val;
+	ror_api_assert(REG_values, settings && settings->IsCheckSumValid());
+	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+		unsigned long int enableInputMethod = 0x41BDC0;
+		_asm {
+			MOV EAX, enableInputMethod;
+			MOV ECX, settings;
+			CALL EAX;
+		}
+		REG_values->fixesForGameEXECompatibilityAreDone = true;
+	}
+
 	if (!ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
 		ROCKNROR::crCommand.OnGameStart();
 	}
