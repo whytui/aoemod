@@ -142,7 +142,7 @@ std::string crTriggerSet::ToString(bool onlyEnabledTriggers) const {
 	crTriggerListElem *elem = this->firstTriggerElem;
 	while (elem) {
 		result += "\r\n";
-		result += KW_TRIGGER_SECTION;
+		result += GetTriggerSpecialKeyword(KW_TRIGGER_SECTION);
 		result += "\r\n";
 		result += elem->ToString(onlyEnabledTriggers);
 		elem = elem->next;
