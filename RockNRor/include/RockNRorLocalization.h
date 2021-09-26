@@ -21,13 +21,14 @@ public:
 	// Read a localization text file and imports all strings from it
 	// Returns true if successful
 	bool LoadTranslationsFromFile(std::string filename);
+	// Set a string in map. Overwrite previous string, if any.
+	void SetString(unsigned short int stringId, const char *text);
+
 private:
 	std::map<unsigned short int, const char*> localizedStrings;
 
 	// Get a string from map, if found. Returns NULL if not found.
 	const char *GetString(unsigned short int stringId) const;
-	// Set a string in map. Overwrite previous string, if any.
-	void SetString(unsigned short int stringId, const char *text);
 	// Removes a string from map, if found.
 	void RemoveString(unsigned short int stringId);
 };

@@ -365,9 +365,13 @@ void RockNRorCommand::PatchExeForDrsScreenResolution(STRUCT_GAME_SETTINGS *setti
 		long int drsScreenSizeY = screenSizedSlp->slpFileData->ySize;
 
 		std::string msg = "Detected DRS screen resolution is ";
-		msg += std::to_string(drsScreenSizeX) + std::string(" * ") + std::to_string(drsScreenSizeY);
+		std::string resolutionAsText = std::to_string(drsScreenSizeX) + std::string(" * ") + std::to_string(drsScreenSizeY);
+		msg += resolutionAsText;
 		traceMessageHandler.WriteMessageNoNotification(msg);
 		ROCKNROR::PATCHER::ChangeExeResolution(drsScreenSizeX, drsScreenSizeY);
+
+		// Add/update the "1024*768" label so the correct values are displayed in "game options" popup
+		localizationHandler.SetString(LANG_ID_1024_768, resolutionAsText.c_str());
 	}
 	AOE_METHODS::FreeSlpInfo(screenSizedSlp);
 	screenSizedSlp = NULL;
