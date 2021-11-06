@@ -1603,28 +1603,31 @@ bool RockNRorCommand::ApplyCustomizationOnRandomGameStart() {
 	}
 
 	// Initial resources : read from config & apply to game
-	long int initialResources[4] = { 200, 200, 150, 0 };
-	if (isDM) {
-		for (int i = 0; i < 4; i++) {
-			initialResources[i] = ROCKNROR::crInfo.configInfo.initialResources_DM[i];
+	if (ROCKNROR::crInfo.configInfo.initialResourcesEnabled) {
+		long int initialResources[4] = { 200, 200, 150, 0 };
+		if (isDM) {
+			for (int i = 0; i < 4; i++) {
+				initialResources[i] = ROCKNROR::crInfo.configInfo.initialResources_DM[i];
+			}
 		}
-	} else {
-		int choice = settings->initialResourcesChoice;
-		if ((choice < 0) || (choice > 3)) { choice = 0; } // Make sure we have a valid choice 0-3
-		for (int i = 0; i < 4; i++) {
-			initialResources[i] = ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[choice][i];
+		else {
+			int choice = settings->initialResourcesChoice;
+			if ((choice < 0) || (choice > 3)) { choice = 0; } // Make sure we have a valid choice 0-3
+			for (int i = 0; i < 4; i++) {
+				initialResources[i] = ROCKNROR::crInfo.configInfo.initialResourcesByChoice_RM[choice][i];
+			}
 		}
-	}
-	for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
-		AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
-		for (int rt = 0; rt < 4; rt++) {
-			player->SetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES) rt, (float)initialResources[rt]);
-		}
-		if (!ROCKNROR::crInfo.myGameObjects.doNotApplyHardcodedCivBonus && !isDM) {
-			// After setting initial resources, re-apply shang food penalty to match original code (RM only, if NOT all techs)
-			if (player->civilizationId == CST_CIVID_SHANG) {
-				player->SetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD,
-					player->GetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD) - 40);
+		for (long int playerId = 1; playerId <= settings->rgeGameOptions.playerCountWithoutGaia; playerId++) {
+			AOE_STRUCTURES::STRUCT_PLAYER *player = GetPlayerStruct(playerId);
+			for (int rt = 0; rt < 4; rt++) {
+				player->SetResourceValue((AOE_CONST_FUNC::RESOURCE_TYPES) rt, (float)initialResources[rt]);
+			}
+			if (!ROCKNROR::crInfo.myGameObjects.doNotApplyHardcodedCivBonus && !isDM) {
+				// After setting initial resources, re-apply shang food penalty to match original code (RM only, if NOT all techs)
+				if (player->civilizationId == CST_CIVID_SHANG) {
+					player->SetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD,
+						player->GetResourceValue(AOE_CONST_FUNC::RESOURCE_TYPES::CST_RES_ORDER_FOOD) - 40);
+				}
 			}
 		}
 	}

@@ -144,6 +144,7 @@ public:
 
 	// Random Games settings
 	bool noNeutralInitialDiplomacy; // If true, initial diplomacy for no-team players will be enemy, not neutral. AI won't become all allied against human.
+	bool initialResourcesEnabled; // If true, apply "initialResources" settings at game startup. If false, ignore this feature, let ROR code initialize player resources.
 	long int initialResourcesByChoice_RM[4][4]; // First index=user choice (default/small/medium/large), Second index=resource type.
 	long int initialResources_DM[4]; // Initial resources in deathmatch
 	long int initialResourceHardestAIBonus_RM[4]; // Initial bonus for AI players in hardest in random games

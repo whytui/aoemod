@@ -115,6 +115,7 @@ RockNRorConfig::RockNRorConfig() {
 	this->allyExplorationIsAlwaysShared = false; // Game default
 	this->singlePlayerMaxPopulation = 50; // Game default
 	this->noNeutralInitialDiplomacy = false; // Game default.
+	this->initialResourcesEnabled = false; // Game default.
 	this->InitializeDefaultResourceValues();
 	for (int i = 0; i <= AOE_CONST_FUNC::CST_LAST_SN_NUMBER; i++) {
 		this->defaultPerNumbers_RM_isSet[i] = false;
@@ -531,6 +532,7 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			this->useGatesFeature = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "initialResources") {
+			this->initialResourcesEnabled = this->XML_GetBoolElement(elem, "enable");
 			ROCKNROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
 			int RMChoice = -1;
 			if (gameType == ROCKNROR::CFG_GAME_RANDOM_GAME) {

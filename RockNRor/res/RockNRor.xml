@@ -301,6 +301,7 @@
 	choice=2 corresponds to Medium
 	choice=3 corresponds to Large
 	-->
+	<initialResources enable="1"/><!-- enables(1) or the initial resources handling. Disable(0)=let vanilla ROR do it -->
 	<initialResources gameType="RM" choice="0" food="200" wood="200" stone="150" gold="0"></initialResources><!--"default": default 200/200/150/0-->
 	<initialResources gameType="RM" choice="1" food="200" wood="200" stone="100" gold="0"></initialResources><!--small: default 200/200/100/0-->
 	<initialResources gameType="RM" choice="2" food="500" wood="500" stone="250" gold="0"></initialResources><!--medium: default 500/500/250/0-->
