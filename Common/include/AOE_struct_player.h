@@ -240,7 +240,7 @@ namespace AOE_STRUCTURES {
 	public:
 		char unused_04F;
 		// 0x50
-		float *ptrResourceValues; // To get a resource value: player->ptrResourceValues[CST_RES_ORDER_xxx])
+		float *ptrResourceValues; // To get a resource value: player->ptrResourceValues[CST_RES_ORDER_xxx]). Initialized using civDef resource values at 0x45B960.
 		char tileSet; // +54. Civilization tileset, 5 max (0-4). 4 is ROR's added tileset.
 		char unknown_055_unused[3];
 		STRUCT_PLAYER_NEW_EXPLORED_TILES newExploredTilesForInfAI; // +58. New explored tiles. Read/reset in "manageInfAI". It is non-empty only temporarily ! Avoid using this directly.

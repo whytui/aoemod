@@ -532,7 +532,11 @@ bool RockNRorConfig::ReadXMLConfigFile(char *fileName) {
 			this->useGatesFeature = XML_GetBoolElement(elem, "enable");
 		}
 		if (elemName == "initialResources") {
-			this->initialResourcesEnabled = this->XML_GetBoolElement(elem, "enable");
+			const char *tmpEnable= elem->Attribute("enable");
+			if (tmpEnable) {
+				// Only update if the attribute IS explicitly present (because there might be many <initialResources> tags)
+				this->initialResourcesEnabled = this->XML_GetBoolElement(elem, "enable");
+			}
 			ROCKNROR::ConfigGameType gameType = this->XML_ReadGameTypeAttribute(elem);
 			int RMChoice = -1;
 			if (gameType == ROCKNROR::CFG_GAME_RANDOM_GAME) {
