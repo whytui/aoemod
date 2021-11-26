@@ -71,6 +71,11 @@ bool ROCKNROR::PATCHER::ChangeItfDRS_file() {
 // Patches ROR executable for a new (max) screen resolution
 // Returns true if successful
 bool ROCKNROR::PATCHER::ChangeExeResolution(long int sizeX, long int sizeY) {
+	bool result = true;
+	FILE *fileLog = NULL;
+	int logFileRes;
+	logFileRes = fopen_s(&fileLog, MOD_NAME "\\" MOD_NAME ".log", "a+"); // appends (do not overwrite)
+	bool hasLog = (logFileRes == 0);
 	try {
 		EnableWritingInRData(true);
 		RORProcessEditor pe;
@@ -114,15 +119,26 @@ bool ROCKNROR::PATCHER::ChangeExeResolution(long int sizeX, long int sizeY) {
 		ROCKNROR::PATCHER::SetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_RESOLUTION, "SI_VPos_InstrButton", 0, sizeY - 78);
 		ROCKNROR::PATCHER::SetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_RESOLUTION, "SI_VPos_HintsButton", 0, sizeY - 78);
 		ROCKNROR::PATCHER::SetBinaryChangeVarValue(BINSEQ_CATEGORIES::BC_RESOLUTION, "SI_VPos_OkButton", 0, sizeY - 78);
+
+		if (hasLog) {
+			std::string msg = "Patching the game to apply custom resolution : ";
+			msg.append(std::to_string(sizeX));
+			msg.append("*");
+			msg.append(std::to_string(sizeY));
+			msg.append("\n");
+			fprintf_s(fileLog, msg.c_str());
+		}
 	}
 	catch (std::exception e) {
 		traceMessageHandler.WriteMessage(e.what());
 		EnableWritingInRData(false);
-		return false;
+		result = false;
+	}
+	if (!logFileRes) {
+		fclose(fileLog);
 	}
 
-
-	return true;
+	return result;
 }
 
 }
