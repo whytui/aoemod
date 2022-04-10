@@ -400,7 +400,11 @@ bool EmpiresX_API::SetROR_API(bool activate) {
 		this->aoeManager.SetUserSelection(BC_ROR_API, _T("ROR_API_DLL_initialization"), choice);
 		this->aoeManager.SetUserSelection(BC_ROR_API, _T("ROR_API_DLL_API_methods"), choice);
 		this->aoeManager.SetUserSelection(BC_ROR_API, _T("ROR_API_VarDataUpdate"), choice);
-		this->aoeManager.SetUserSelection(BC_ROR_API, _T("ROR_API_CDCheck_stub"), choice);
+		int indexCDCheckStub = this->aoeManager.GetSeqDefIndex(BC_ROR_API, _T("ROR_API_CDCheck_stub"));
+		if (indexCDCheckStub >= 0) {
+			// CDCheck stub does not exist on AOK akpha, so make it optional
+			this->aoeManager.SetUserSelection(BC_ROR_API, _T("ROR_API_CDCheck_stub"), choice);
+		}
 	}
 	catch (std::exception &e) {
 		printf("ERROR: %s\n", e.what());

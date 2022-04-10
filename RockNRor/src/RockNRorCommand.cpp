@@ -304,6 +304,11 @@ void RockNRorCommand::ReadIfManageAIIsOn() {
 
 // Reads game executable to determine if various sequences are installed or not
 void RockNRorCommand::ReadOtherSequencesStatus() {
+#ifdef GAMEVERSION_AOK0005030706
+	ROCKNROR::crInfo.hasRemovePlayerInitialAgeInScenarioInit = false;
+	ROCKNROR::crInfo.hasFixForBuildingStratElemUnitId = false;
+	return;
+#endif
 	ROCKNROR::crInfo.hasRemovePlayerInitialAgeInScenarioInit = ROCKNROR::PATCHER::IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixScenarioBadInitialAgeApplication_removeBad");
 	ROCKNROR::crInfo.hasFixForBuildingStratElemUnitId = ROCKNROR::PATCHER::IsBinaryChangeOn(BINSEQ_CATEGORIES::BC_ROR_API, "FixUnitIdForInProgressBuilding");
 }

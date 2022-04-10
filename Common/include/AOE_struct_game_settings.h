@@ -149,8 +149,13 @@ namespace AOE_STRUCTURES {
 #define CHECKSUM_GAME_SETTINGS 0x0054A264 // "Tribe Game"
 #define CHECKSUM_GAME_SETTINGS_BASE 0x005430B4 // "RGE_Base_Game". Base class. Constructor=0x4162B0
 #endif
+#ifdef GAMEVERSION_AOK0005030706
+#define CHECKSUM_GAME_SETTINGS 0x005B38B0 // Constructor=0x552210
+#define CHECKSUM_GAME_SETTINGS_BASE 0x5AA400 // Constructor=0x41E4B0
+#endif
 	// Size = 0x11A0 (AOE1.0b&c). Constructor 0x4F91C0 (empires.exe). "RGE_Base_Game"
 	// Size = 0x1254. Constructor 0x5004C0(1.0b), 0x4FDFA0(1.0c) - arg1=commandLineInfo, arg2=?
+	// Size = 0x1404 (ROR2 alpha)
 	// Warning: this mainly represents information from UI, many fields are NOT RELEVANT (and arbitratry) when loading a saved game.
 	// +0x00 = gameSettings.destructor(do_free)
 	// +0x04 = gameSettings.run()
@@ -263,6 +268,9 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_044;
 		STRUCT_UI_DRAW_SYSTEM *drawSystem; // +48. TDrawSystem. Init 0x41829B.
 		STRUCT_UI_DRAW_AREA *renderArea; // +4C. basegame ?? Ptr to struct size>=478. Corresponds to TDrawSystem+0x0C
+#ifdef GAMEVERSION_AOK0005030706
+		unsigned long int unknown_aok_50; // somewhere between +38 and +4C
+#endif
 		GAME_UNITS_OUTLINE_MODE outline; // +50. Values 0-3. to test
 		char unknown_051[3];
 		long int customMousePointer; // +54. Set to 0 if NORMALMOUSE command-line argument is provided.
@@ -290,11 +298,15 @@ namespace AOE_STRUCTURES {
 		long int stopIfSyncFail; // +190. Unsure.
 		long int dropPacketsIntentionally; // +194. Unsure. Not sure it does have an effect in final versions ?
 		long int showSyncChatMessages; // 198. Unsure.
+#ifdef GAMEVERSION_AOK0005030706
+		unsigned long int unknown_aok_1B0; // somewhere between 19C and 1B0 included
+#endif // GAMEVERSION_AOK0005030706
+
 		long int enableStepMode; // +19C. Unsure. Not sure it does have an effect in final versions ?
 		long int enableSpeedControl; // +1A0. Unsure.
 		STRUCT_TDEBUGGING_LOG *appLogger; // +1A4.
 		unsigned long int unknown_1A8; // +1A8. Related to logger.
-		STRUCT_TREGISTRY *unknown_1AC_registry; // related to registry ?
+		STRUCT_TREGISTRY *unknown_1AC_registry; // +1AC. Related to registry ?
 		// 0x1B0
 		AOE_CONST_INTERNAL::GAME_SETTINGS_UI_STATUS currentUIStatus; // 0=loading,2=inMenu,4=playing,7=editor "programMode".
 		AOE_CONST_INTERNAL::MOUSE_ACTION_TYPES mouseActionType; // +1B4. "Game mode". Set this during game, you'll be able to edit the map !! userSelected* fields
@@ -343,23 +355,35 @@ namespace AOE_STRUCTURES {
 		unsigned long int unknown_8EC;
 		unsigned long int unknown_8F0;
 		unsigned long int unknown_8F4;
-		STRUCT_RGE_GAME_OPTIONS rgeGameOptions; // +8A8. Size=0xA8. Cf 0x41B430.
+		STRUCT_RGE_GAME_OPTIONS rgeGameOptions; // +8F8. Size=0xA8. Cf 0x41B430.
 		// 0x9A0
 		long int isCampaign; // get in 41B720, set in 41BA50
 		long int isSavedGame; // +9A4. set in 41BA60
 		long int hasSteroidsCheatCode; // +9A8. set in 50CA2B, 4E90B6. Can be cancelled !!! Used in 0x4B1AA2 for construction.
-		long int has_CD; //see 4169D7
+#ifdef GAMEVERSION_AOK0005030706
+		unsigned long int unknown_aok_9B4; // somewhere before 9B8, after 900 included
+#endif
+		long int has_CD; //+9AC. see 4169D7
 		// 0x9B0
 		long int chosenPlayerIndex[9]; // index in 0-8 (playerId, including gaia)
 		// to 9D4...
 		unsigned long int unknown_9D4;
 		long int playerWondersVictoryDelays[9]; // +9D8. index in 0-8 (playerId, including gaia). Remaining "years" for each player's wonder victory trigger. See 0x41C100. If a wonder is destroyed but player has still another one, the counter is NOT reset. -1=not relevant.
+#ifdef GAMEVERSION_AOK0005030706
+		unsigned long int unknown_aok_B08; // somewhere before B0C=gameIsRunning (9FC in ror) shift is 0x10 here
+#endif
 		// to 9FC...
 		long int gameIsRunning; // +9FC. You can simply set it to 0 to pause game.
 		// 0xA00
 		long int previousPauseIsUserPause; // +A00. Game was already paused when implicit pause was applied (eg open menu). See 0x419A60=setGameRunning
 		long int currentPauseIsNonUserPause; // +A04. Set to 1 only when a "pause" is applied implicitely (eg open menu). Set to 0 on unpause/explicit user pause (F3).
+#ifdef GAMEVERSION_AOK0005030706
+		unsigned char unknown_B18[0x100]; // somewhere before B18 / A08 in ror. shift is 0x110 here
+#endif
 		unsigned long int unknown_A08;
+#ifdef GAMEVERSION_AOK0005030706
+		unsigned char unknown_aok_B30[0x14]; // somewhere before B30 / A0C in ror. shift=0x124
+#endif
 		float gameSpeed; // +A0C. Get in 0x41C170.
 		AOE_CONST_INTERNAL::GAME_DIFFICULTY_LEVEL difficultyLevelChoice; // +A10. Get in 41C190. Copied into +993=rgeGameOptions.
 		char unknown_A11;
@@ -405,7 +429,7 @@ namespace AOE_STRUCTURES {
 		char maxPopulation; // +AE6. For MP games. Set in 0x5055A0, Get in 0x5054F0. [+A9E in aoe10b]
 		char unknown_AE7;
 		char unknown_scenarioAutoSaveFileName[0x104]; // +AE8. Used in 0x502A55
-		// 0xBEC
+		// 0xBEC (CCC in AOK alpha) shift E0
 		char unknown_BEC[0xC20 - 0xBEC];
 		// 0xC20
 		unsigned long int unknown_C20;
@@ -432,6 +456,7 @@ namespace AOE_STRUCTURES {
 		char unknown_1197;
 		char civPlayerNameIsUsed[0x08 * 0x0A]; // +1198. 8=number of players, 0x0A=number of names (0=unused, 1-9=used)
 		char unknown_11E8[0x1254 - 0x11E8];
+		// 1250 in ROR is 13D4 in AOK alpha
 
 		bool IsCheckSumValid() const {
 			return (this->checksum == CHECKSUM_GAME_SETTINGS) || (this->checksum == CHECKSUM_GAME_SETTINGS_BASE);

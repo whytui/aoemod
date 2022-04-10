@@ -396,6 +396,9 @@
     <ClInclude Include="include\AOE_struct_tpicture.h">
       <Filter>Fichiers d%27en-tête\AOE_model</Filter>
     </ClInclude>
+    <ClInclude Include="include\AOE_offsets_AOE2_alpha0005030706.h">
+      <Filter>Fichiers d%27en-tête\AOE_tech</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\triggerDefinition.cpp">

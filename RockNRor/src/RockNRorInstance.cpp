@@ -478,6 +478,11 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x526261:
 		this->OnDeleteFile(REG_values);
 		break;
+#ifdef GAMEVERSION_AOK0005030706
+	case 0x5864AB:
+		this->OnLogCloseAOK(REG_values);
+		break;
+#endif
 	default:
 		break;
 	}
@@ -3800,12 +3805,18 @@ void RockNRorInstance::EntryPointOnGetLocalizedString(REG_BACKUP *REG_values) {
 #ifdef GAMEVERSION_ROR10c
 	unsigned long int returnAddress = 0x4FF563;
 #endif
+#ifdef GAMEVERSION_AOK0005030706
+	unsigned long int returnAddress = 0x0; // TODO
+#endif
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 #if defined(GAMEVERSION_AOE10c)
 		REG_values->ECX_val = *p;
 #endif
 #if defined(GAMEVERSION_ROR10b) || defined(GAMEVERSION_ROR10c)
 		REG_values->EAX_val = *p;
+#endif
+#if defined(GAMEVERSION_AOK0005030706)
+		REG_values->ECX_val = *p; // TODO
 #endif
 #ifdef GAMEVERSION_AOE10b // different code in this version
 		REG_values->EDI_val = GetIntValueFromRORStack(REG_values, 0x18);
@@ -5001,6 +5012,27 @@ void RockNRorInstance::OnDeleteFile(REG_BACKUP *REG_values) {
 		}
 	}
 }
+
+
+#ifdef GAMEVERSION_AOK0005030706
+// From 0x5864AB
+void RockNRorInstance::OnLogCloseAOK(REG_BACKUP *REG_values) {
+	REG_values->EDI_val = 0xFFFFFFFF;
+	REG_values->fixesForGameEXECompatibilityAreDone = true;
+	if (REG_values->ESI_val == 0) {
+		ChangeReturnAddress(REG_values, 0x5864B7);
+	} else {
+		unsigned long int tmpeax;
+		unsigned long int tmpesi = REG_values->ESI_val;
+		_asm {
+			MOV ESI, tmpesi;
+			MOV EAX, DS:[ESI + 0x0C];
+			MOV tmpeax, EAX;
+		}
+		REG_values->EAX_val = tmpeax;
+	}
+}
+#endif
 
 
 }

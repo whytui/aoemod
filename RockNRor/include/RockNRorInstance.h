@@ -176,6 +176,9 @@ namespace ROCKNROR {
 		void ExecMoveCmdUsingFormation(REG_BACKUP *REG_values);
 		void OnPlayerAddUnitToSelection(REG_BACKUP *REG_values);
 		void OnDeleteFile(REG_BACKUP *REG_values);
+#ifdef GAMEVERSION_AOK0005030706
+		void OnLogCloseAOK(REG_BACKUP *REG_values);
+#endif
 
 		// Map generation
 		void ManageRelicsCount(REG_BACKUP *REG_values);

@@ -16,6 +16,9 @@
 #ifdef GAMEVERSION_ROR10c
 #include <AOE_offsets_ROR10c.h>
 #endif
+#ifdef GAMEVERSION_AOK0005030706
+#include <AOE_offsets_AOE2_alpha0005030706.h>
+#endif
 
 /* 
  * This file contains various offsets/values that are specific to each AOE/ROR executable
@@ -70,6 +73,21 @@ static unsigned long int AOE_FileOffsetToExeAddr(unsigned long int fileOffset) {
 		return fileOffset + 0x400000;
 	}
 #endif
+#ifdef GAMEVERSION_AOK0005030706
+	if (fileOffset < AOE_OFFSETS::ADDR_FILE_EXE_MAX) {
+		return fileOffset + 0x400c00;
+	}
+	if (fileOffset < (AOE_OFFSETS::ADDR_THIS_CODE_MAX - 0x401400)) {
+		return fileOffset + 0x401400;
+	}
+	if (fileOffset < (AOE_OFFSETS::ADDR_RDATA_MAX - 0x401A00)) {
+		return fileOffset + 0x401A00;
+	}
+	if (fileOffset < (AOE_OFFSETS::ADDR_DATA_MAX - 0x401E00)) {
+		return fileOffset + 0x401E00;
+	}
+#endif // GAMEVERSION_AOK0005030706
+
 	return 0;
 }
 

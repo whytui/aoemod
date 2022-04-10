@@ -109,6 +109,10 @@ bool EmpiresXFileManager::CheckVersionBinarySequence() {
 		versionSeq = new BinarySeqDefinition(EXE_VERSION_CHECK_10C_SIZE, 1, EXE_VERSION_CHECK_10C_OFFSET);
 		versionSeq->WriteSequence(0, EXE_VERSION_CHECK_10C);
 		break;
+	case AOK_VERSION_0005030706:
+		versionSeq = new BinarySeqDefinition(EXE_VERSION_CHECK_AOK0005030706_SIZE, 1, EXE_VERSION_CHECK_AOK0005030706_OFFSET);
+		versionSeq->WriteSequence(0, EXE_VERSION_CHECK_AOK0005030706);
+		break;
 	case AOE_INVALID_FILE:
 		return false;
 		break;
@@ -159,6 +163,9 @@ bool EmpiresXFileManager::FindGameVersion() {
 		break;
 	case EXE_FILE_SIZE_UPATCH_1_1_HD:
 		this->gameFileVersion = AOE_VERSION_UPATCH_1_1_HD;
+		break;
+	case EXE_FILE_SIZE_AOK0005030706:
+		this->gameFileVersion = AOK_VERSION_0005030706;
 		break;
 	default: 
 		this->gameFileVersion = AOE_INVALID_FILE; 

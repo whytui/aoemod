@@ -36,7 +36,7 @@ namespace AOE_OFFSETS
 	static const unsigned long int ADDR_RESOURCES_MIN = 0x7E1000;
 	static const unsigned long int ADDR_RESOURCES_MAX = 0x7E1FFF;
 	static const unsigned long int ADDR_CHECKSUM_MIN = 0x005423F0;
-	static const unsigned long int ADDR_CHECKSUM_MAX = 0x0054AA60;
+	static const unsigned long int ADDR_CHECKSUM_MAX = 0x0054AA54;
 
 	// Game objects/variables...
 	//static const unsigned long int ADDR_VAR_GAME_GLOBAL_STRUCT = 0x6A1808; // Do not use it
@@ -80,6 +80,7 @@ namespace AOE_OFFSETS
 
 	// Game executable interface procedure address (ROR_API call)
 	static const unsigned long int ROR_API_GAME_PROC_ADDR = 0x419574;
+	// Return address of the very first call to ROR_API (which is used to for one-shot initializations)
 	static const unsigned long int AOE_ROR_API_FIRST_CALL_RETURN_ADDRESS = 0x443713;
 
 

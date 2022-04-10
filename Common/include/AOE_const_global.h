@@ -30,6 +30,7 @@ const static long EXE_FILE_SIZE_10B = 1513984;
 const static long EXE_FILE_SIZE_10C = 1503232;
 const static long EXE_FILE_SIZE_UPATCH_BETA = 1511424;
 const static long EXE_FILE_SIZE_UPATCH_1_1_HD = 1515520;
+const static long EXE_FILE_SIZE_AOK0005030706 = 2077184;
 
 // EXE Magic number
 const static size_t EXE_MAGIC_NUMBER_SIZE = 2;
@@ -61,4 +62,11 @@ const static size_t EXE_VERSION_CHECK_10C_OFFSET = 0x16ece6;
 const static size_t EXE_VERSION_CHECK_10C_SIZE = 18;
 const static unsigned char EXE_VERSION_CHECK_10C[EXE_VERSION_CHECK_10C_SIZE] = { // ascii 1.6.1115
 	0x30, 0x00, 0x31, 0x00, 0x2E, 0x00, 0x36, 0x00, 0x2E, 0x00, 0x31, 0x00, 0x31, 0x00, 0x31, 0x00, 0x35, 0x00
+};
+
+// AOK
+const static size_t EXE_VERSION_CHECK_AOK0005030706_OFFSET = 0x1C4368;
+const static size_t EXE_VERSION_CHECK_AOK0005030706_SIZE = 14;
+const static unsigned char EXE_VERSION_CHECK_AOK0005030706[EXE_VERSION_CHECK_AOK0005030706_SIZE] = { // ascii 00.06..01.0717
+	0x30, 0x30, 0x2E, 0x30, 0x36, 0x2E, 0x30, 0x31, 0x2E, 0x30, 0x37, 0x31, 0x37, 0x00
 };

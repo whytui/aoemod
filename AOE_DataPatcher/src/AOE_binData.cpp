@@ -73,6 +73,13 @@ BinarySeqDefSet *AOE_binData::GetSeqDefSet(AOE_FILE_VERSION version, BINSEQ_CATE
 		case BC_LARGER_MAPS: return &this->largerMaps_10c;
 		default: return NULL;
 		}
+	case AOK_VERSION_0005030706:
+		switch (category) {
+		case BC_NONE: return NULL;
+		case BC_WINDOWED_MODE: return &this->windowedMode_AOK0005030706;
+		case BC_ROR_API: return &this->ROR_API_AOK0005030706;
+		default: return NULL;
+		}
 	default: return NULL;
 	}
 }
@@ -95,12 +102,14 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_windowedMode_10b 3
 #define COUNT_windowedMode_10c 3
 #define COUNT_VEG_windowedMode_10c 21
+#define COUNT_windowedMode_AOK0005030706 3
 #define COUNT_selectedUnits_10c 87
 #define COUNT_obsoletes_10c 31
 #define COUNT_ROR_API_AOE10b 6
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
 #define COUNT_ROR_API_10c 143
+#define COUNT_ROR_API_AOK0005030706 4
 #define COUNT_manageAI_10c 13
 #define COUNT_audio_video_10c 9
 #define COUNT_larger_maps_10c 38
@@ -121,6 +130,7 @@ void AOE_binData::InitData() {
 	this->windowedMode_10b.SetCount(COUNT_windowedMode_10b);
 	this->windowedMode_10c.SetCount(COUNT_windowedMode_10c);
 	this->VEG_windowedMode_10c.SetCount(COUNT_VEG_windowedMode_10c);
+	this->windowedMode_AOK0005030706.SetCount(COUNT_windowedMode_AOK0005030706);
 	//this->selectedUnits_10b.SetCount();
 	this->selectedUnits_10c.SetCount(COUNT_selectedUnits_10c);
 	//this->obsoletes_10b.SetCount();
@@ -129,6 +139,7 @@ void AOE_binData::InitData() {
 	this->ROR_API_AOE10c.SetCount(COUNT_ROR_API_AOE10c);
 	this->ROR_API_10b.SetCount(COUNT_ROR_API_10b);
 	this->ROR_API_10c.SetCount(COUNT_ROR_API_10c);
+	this->ROR_API_AOK0005030706.SetCount(COUNT_ROR_API_AOK0005030706);
 	//this->manageAI_10b.SetCount(0);
 	this->manageAI_10c.SetCount(COUNT_manageAI_10c);
 	this->audioVideo_10c.SetCount(COUNT_audio_video_10c);
@@ -140,6 +151,7 @@ void AOE_binData::InitData() {
 	this->InitWindowedMode_AOEc();
 	this->InitWindowedMode_b();
 	this->InitWindowedMode_c();
+	this->InitWindowedMode_AOK0005030706();
 	this->InitTechFixes_10b();
 	this->InitTechFixes_10c();
 	this->InitOptions_AOE10b();
@@ -152,6 +164,7 @@ void AOE_binData::InitData() {
 	this->InitROR_API_AOE10c();
 	this->InitROR_API_10b();
 	this->InitROR_API_10c();
+	this->InitROR_API_AOK0005030706();
 	this->InitManageAI();
 	this->InitAudioVideo_10c();
 	this->InitLargerMaps_10c();
@@ -1734,6 +1747,49 @@ void AOE_binData::InitWindowedMode_c() {
 	}
 #ifdef _DEBUG
 	printf("VEG_windowedMode_10c=%d\n", i);
+#endif
+}
+
+
+
+void AOE_binData::InitWindowedMode_AOK0005030706() {
+	int i = 0;
+
+	NEXT_INITSEQ_2_NOVAR(this->windowedMode_AOK0005030706.GetBinSeqDefinition(i),
+		ScreenToClient1,
+		"Fix ScreenToClient call.\n Impacts mouse when placing an object...",
+		0x22989,
+		(0xFF, 0x15, 0xFC, 0x92, 0x5A, 0x00, 0x8B, 0x47, 0x0C, 0x8B, 0x88, 0x94, 0x08, 0x00, 0x00, 0x85, 0xC9, 0x75, 0x2D, 0x8B, 0x4F, 0x10), // default=no
+		(0xFF, 0x15, 0xFC, 0x92, 0x5A, 0x00, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x8B, 0x4F, 0x10),
+		FM_OFF,
+		FM_ON
+	);
+	
+	NEXT_INITSEQ_2_NOVAR(this->windowedMode_AOK0005030706.GetBinSeqDefinition(i),
+		ScreenToClient2,
+		"Fix ScreenToClient call. Impacts mouse position...",
+		0x6DA37,
+		(0x8B, 0x08, 0x80, 0xB9, 0x81, 0x04, 0x00, 0x00, 0x01, 0x75, 0x3B, 0x8B, 0x40, 0x04), // default=no
+		(0x8B, 0x08, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x8B, 0x40, 0x04),
+		FM_OFF,
+		FM_ON
+	);
+
+	NEXT_INITSEQ_2_NOVAR(this->windowedMode_AOK0005030706.GetBinSeqDefinition(i),
+		ScreenToClient3,
+		"Fix ScreenToClient call. Impacts mouse cursor change according to underlying object (possible action)",
+		0x785BF,
+		(0x8B, 0x47, 0x20, 0x8B, 0x08, 0x80, 0xB9, 0x81, 0x04, 0x00, 0x00, 0x02, 0x74, 0x2D, 0x8B, 0x50, 0x04), // default=no
+		(0x8B, 0x47, 0x20, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x8B, 0x50, 0x04),
+		FM_OFF,
+		FM_ON
+	);
+
+	if (i != COUNT_windowedMode_AOK0005030706) {
+		throw AOE_binDataSetupException("Binary setup error for windowedMode_AOK0005030706. Bad element count.");
+	}
+#ifdef _DEBUG
+	printf("windowed_AOK0005030706=%d\n", i);
 #endif
 }
 
@@ -4108,6 +4164,7 @@ void AOE_binData::InitROR_API_10b() {
 #endif
 }
 
+
 void AOE_binData::InitROR_API_10c() {
 	int i = 0;
 
@@ -5598,6 +5655,78 @@ void AOE_binData::InitROR_API_10c() {
 	}
 #ifdef _DEBUG
 	printf("ROR_API 1.0c=%d\n", i); // DEBUG
+#endif
+}
+
+
+void AOE_binData::InitROR_API_AOK0005030706() {
+	int i = 0;
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_AOK0005030706.GetBinSeqDefinition(i),
+		ROR_API_VarDataUpdate,
+		"ROR_API basic requirement. Update in variables section.",
+		0x001BC130,
+		(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00), // default=no
+		(0x52, 0x4F, 0x52, 0x5F, 0x41, 0x50, 0x49, 0x2E, 0x64, 0x6C, 0x6C, 0x00, 0x47, 0x65, 0x6E, 0x65, 0x72, 0x69, 0x63, 0x43, 0x61, 0x6C, 0x6C, 0x00),
+		FM_OFF,
+		FM_ON
+	);
+
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_AOK0005030706.GetBinSeqDefinition(i),
+		ROR_API_DLL_initialization,
+		"ROR_API basic requirement. Init call.",
+		0x00189AF2,
+		(0xA3, 0x00, 0xAF, 0x8C, 0x00, 0xE8, 0xD4, 0x72, 0x00, 0x00, 0x85, 0xC0), // default=no
+		(0xA3, 0x00, 0xAF, 0x8C, 0x00, 0xE8, 0xFC, 0x1F, 0x01, 0x00, 0x85, 0xC0),
+		FM_OFF,
+		FM_ON
+	);
+
+	/*NEXT_INITSEQ_2_NOVAR(this->ROR_API_AOK0005030706.GetBinSeqDefinition(i),
+		ROR_API_CDCheck_stub,
+		"Stub to make sure cd check is successful",
+		0x,
+		(), // default=no
+		(),
+		FM_OFF,
+		FM_ON
+	);*/
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_AOK0005030706.GetBinSeqDefinition(i),
+		ROR_API_DLL_API_methods,
+		"ROR_API basic requirement. Add API methods",
+		0x0019BAC0,
+		(0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // code part #2
+			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 // code part #3
+			), // default=no
+		(0x60, 0x8B, 0x35, 0x68, 0x92, 0x5A, 0x00, 0x68, 0x30, 0xDB, 0x5B, 0x00, 0xFF, 0xD6, 0xA3, 0xF8, 0xCF, 0x8C, 0x00, 0x85, 0xC0, 0x74, 0x12, 0x68, 0x3C, 0xDB, 0x5B, 0x00, 0x50, 0xFF, 0x15, 0x28, 0x91, 0x5A, 0x00, 0xA3, 0xFC, 0xCF, 0x8C, 0x00, 0x61, 0xC3,
+			0x50, 0xA1, 0xFC, 0xCF, 0x8C, 0x00, 0x85, 0xC0, 0x74, 0x02, 0xFF, 0xD0, 0x58, 0xC3, // code part #2
+			0xE8, 0xC3, 0xFF, 0xFF, 0xFF, 0xE8, 0xE8, 0xFF, 0xFF, 0xFF, 0xE9, 0xC9, 0x52, 0xFF, 0xFF // code part #3
+			),
+		FM_OFF,
+		FM_ON
+	);
+
+	// Optionals
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_AOK0005030706.GetBinSeqDefinition(i),
+		ROR_API_FixCrashCloseLogFile,
+		"ROR_API optional change. fix a crash that occurs silently when the game exits",
+		0x001858A5,
+		(0x57, 0x83, 0xCF, 0xFF, 0x8B, 0x46, 0x0C, 0xA8, 0x40), // default=no
+		(0x57, 0xE8, 0x3F, 0x62, 0x01, 0x00, 0x90, 0xA8, 0x40),
+		FM_OFF,
+		FM_ON
+	);
+
+
+	if (i != COUNT_ROR_API_AOK0005030706) {
+		throw AOE_binDataSetupException("Binary setup error for ROR_API_AOK0005030706. Bad element count.");
+	}
+#ifdef _DEBUG
+	printf("ROR_API_AOK alpha0005030706=%d\n", i); // DEBUG
 #endif
 }
 

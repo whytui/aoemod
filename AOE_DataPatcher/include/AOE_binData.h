@@ -33,12 +33,14 @@ public:
 	BinarySeqDefSet VEG_windowedMode_10b;
 	BinarySeqDefSet windowedMode_10c;
 	BinarySeqDefSet VEG_windowedMode_10c;
+	BinarySeqDefSet windowedMode_AOK0005030706;
 	BinarySeqDefSet techFixes_10b;
 	BinarySeqDefSet techFixes_10c;
 	BinarySeqDefSet ROR_API_AOE10b;
 	BinarySeqDefSet ROR_API_AOE10c;
 	BinarySeqDefSet ROR_API_10b;
 	BinarySeqDefSet ROR_API_10c;
+	BinarySeqDefSet ROR_API_AOK0005030706;
 	BinarySeqDefSet options_AOE10b;
 	BinarySeqDefSet options_AOE10c;
 	BinarySeqDefSet options_10b;
@@ -66,6 +68,7 @@ private:
 	void InitWindowedMode_AOEc();
 	void InitWindowedMode_b();
 	void InitWindowedMode_c();
+	void InitWindowedMode_AOK0005030706();
 	void InitTechFixes_10b();
 	void InitTechFixes_10c();
 	void InitOptions_AOE10b();
@@ -78,6 +81,7 @@ private:
 	void InitROR_API_AOE10c();
 	void InitROR_API_10b();
 	void InitROR_API_10c();
+	void InitROR_API_AOK0005030706();
 	void InitManageAI();
 	void InitAudioVideo_10c();
 	void InitLargerMaps_10c();

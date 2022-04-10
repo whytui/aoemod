@@ -20,6 +20,9 @@ This file allows to define with which game version RockNRor will be compatible.
 #define GAMEVERSIONID_UPATCH_BETA 6
 #define GAMEVERSIONID_UPATCH_1_1_HD 7
 
+// AOK
+#define GAMEVERSIONID_AOK0005030706 8
+
 // List of supported (recognized) versions
 // If updated, please update AOEFileVersionLabel in AOE_const_global.h too
 enum AOE_FILE_VERSION {
@@ -33,6 +36,8 @@ enum AOE_FILE_VERSION {
 	AOE_VERSION_ROR1_0C = GAMEVERSIONID_ROR10c, // ROR with patch 1.0c
 	AOE_VERSION_UPATCH_BETA = GAMEVERSIONID_UPATCH_BETA, // ROR
 	AOE_VERSION_UPATCH_1_1_HD = GAMEVERSIONID_UPATCH_1_1_HD, // ROR
+	// AOK versions
+	AOK_VERSION_0005030706 = GAMEVERSIONID_AOK0005030706, // AOK alpha
 	AOE_VERSION_COUNT
 };
 
@@ -43,7 +48,7 @@ enum AOE_FILE_VERSION {
 
 // ********************************************************************
 // *** Choose game version to support (see numeric constants above) ***
-#define GAMEVERSION GAMEVERSIONID_ROR10c
+#define GAMEVERSION GAMEVERSIONID_AOK0005030706
 // ********************************************************************
 
 
@@ -79,11 +84,15 @@ static const inline AOE_FILE_VERSION GetBuildVersion() {
 #if GAMEVERSION == GAMEVERSIONID_ROR10b
 #define GAMEVERSION_TEXT "ROR 1.0b"
 #define GAMEVERSION_ROR10b
+#define GAME_IS_ROR true
 #endif
 #if GAMEVERSION == GAMEVERSIONID_ROR10c
 #define GAMEVERSION_TEXT "ROR 1.0c"
 #define GAMEVERSION_ROR10c
-#endif
-#ifndef GAME_IS_AOE
 #define GAME_IS_ROR true
-#endif // !GAME_IS_AOE
+#endif
+#if GAMEVERSION == GAMEVERSIONID_AOK0005030706
+#define GAMEVERSION_TEXT "AOK alpha"
+#define GAMEVERSION_AOK0005030706
+#define GAME_IS_AOK true
+#endif
