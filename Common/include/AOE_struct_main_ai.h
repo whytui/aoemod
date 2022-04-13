@@ -22,9 +22,15 @@
 namespace AOE_STRUCTURES {
 	class STRUCT_PLAYER;
 
+#ifndef GAMEVERSION_AOK0005030706
 #define CHECKSUM_AI_PARENT 0x00542C04
 #define CHECKSUM_AI 0x00548BF0
+#endif
 
+#ifdef GAMEVERSION_AOK0005030706
+#define CHECKSUM_AI_PARENT 0
+#define CHECKSUM_AI 0x005B1848 // Ccor 0x510150, size=0x13564
+#endif
 	// The main AI object. Total size = 0x125C8. Constructor = 0x4C6960.
 	// Checksums: F0 8B 54 00 (normal) + parents 04 2C 54 00, B0 2B 54 00
 	// +0x00 = destructor(do_free)
@@ -41,14 +47,14 @@ namespace AOE_STRUCTURES {
 
 		STRUCT_MANAGED_ARRAY allMyUnits; // +F4. Can contain empty elements ? Remove in 40B950.
 		STRUCT_BUILD_AI structBuildAI; // +0x104
-		STRUCT_CON_AI structConAI; // +0x6C4 ; city plan
-		STRUCT_DIPLOMACY_AI structDiplAI; // +0x9DC
-		STRUCT_EMOTIONAL_AI structEmotionalAI; // +0xB2C
-		STRUCT_INF_AI structInfAI; // +0xCEC
-		STRUCT_RESOURCE_AI structResourceAI; // +0x10D7C
-		STRUCT_STRATEGY_AI structStrategyAI; // +0x10E74
-		STRUCT_TAC_AI structTacAI; // +0x1146C
-		STRUCT_TRADE_AI structTradeAI; // +0x12478
+		STRUCT_CON_AI structConAI; // +0x6C4 ; city plan [+ECC aok?]
+		STRUCT_DIPLOMACY_AI structDiplAI; // +0x9DC [+11E4 aok?]
+		STRUCT_EMOTIONAL_AI structEmotionalAI; // +0xB2C [+1334 aok?]
+		STRUCT_INF_AI structInfAI; // +0xCEC  [+14F4 aok?]
+		STRUCT_RESOURCE_AI structResourceAI; // +0x10D7C [+11D88 aok?]
+		STRUCT_STRATEGY_AI structStrategyAI; // +0x10E74 [+11E80 aok?]
+		STRUCT_TAC_AI structTacAI; // +0x1146C [+12480 aok?]
+		STRUCT_TRADE_AI structTradeAI; // +0x12478 [+13414 aok?]
 
 		STRUCT_PLAYER *player; // +1256C. Pointer to player structure
 		// +12570. =1 until game start AI init has been done. Includes log like values, add dynamic strategy, resource AI bonus, tribute info init
@@ -72,6 +78,8 @@ namespace AOE_STRUCTURES {
 
 		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_AI; }
 	};
+#ifndef GAMEVERSION_AOK0005030706
 	static_assert(sizeof(STRUCT_AI) == 0x125C8, "STRUCT_AI size");
+#endif
 
 }

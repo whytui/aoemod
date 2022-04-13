@@ -421,6 +421,7 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 		s += std::to_string(targetPlayer0);
 		s += ". tacAI.targetInfo [";
 		AOE_STRUCTURES::STRUCT_TAC_AI *remoteTacAIAddress = (AOE_STRUCTURES::STRUCT_TAC_AI *)(((unsigned long int)rd->players[playerId].ptrAIStruct) + 0x1146C);
+#ifndef GAMEVERSION_AOK0005030706
 		s += GetHexStringAddress((unsigned long int)&remoteTacAIAddress->targetInfo);
 		s += "] [targetUnitid]";
 		s += std::to_string(ai->structTacAI.targetInfo.targetUnitId);
@@ -454,6 +455,7 @@ void WxDebugMainForm::ShowMilitaryInfo() {
 		s += MilliSecondsToString(ai->structTacAI.lastPanicModeStrategyUpdateTime);
 		s += "\nlastAIUpdateTime=";
 		s += MilliSecondsToString(ai->structTacAI.lastAIUpdateTime_ms);
+#endif
 
 		s += "\nLandMilitary=";
 		s += std::to_string(ai->structTacAI.landMilitaryUnits.usedElements);

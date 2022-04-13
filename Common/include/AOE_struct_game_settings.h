@@ -266,11 +266,11 @@ namespace AOE_STRUCTURES {
 		// 0x40
 		unsigned long int errorCode; // +40. Get in 0x417460.
 		unsigned long int unknown_044;
+#ifdef GAMEVERSION_AOK0005030706
+		unsigned long int unknown_aok_48; // somewhere between +38 and +4C
+#endif
 		STRUCT_UI_DRAW_SYSTEM *drawSystem; // +48. TDrawSystem. Init 0x41829B.
 		STRUCT_UI_DRAW_AREA *renderArea; // +4C. basegame ?? Ptr to struct size>=478. Corresponds to TDrawSystem+0x0C
-#ifdef GAMEVERSION_AOK0005030706
-		unsigned long int unknown_aok_50; // somewhere between +38 and +4C
-#endif
 		GAME_UNITS_OUTLINE_MODE outline; // +50. Values 0-3. to test
 		char unknown_051[3];
 		long int customMousePointer; // +54. Set to 0 if NORMALMOUSE command-line argument is provided.

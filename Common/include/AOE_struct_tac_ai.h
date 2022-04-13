@@ -179,6 +179,8 @@ namespace AOE_STRUCTURES {
 		long int storagePitAddedToStrategy; // +F88. 1 when a SP has been inserted into strategy.
 		long int granaryAddedToStrategy; // +F8C. 1 when a granary has been inserted into strategy.
 		long int lastConstructionStartOrAddToStrategyTime; // +F90. 4D2245,4D242A... Last game time when a construction was triggered or added to strategy ?
+		// aok alpha : ends at F94?
+#ifndef GAMEVERSION_AOK0005030706
 		long int lastPanicModeStrategyUpdateTime; // +F94. In milliseconds. Updated with game time when "panic mode" units are added to strategy.
 		long int unknown_F98_timeAboutTributes; // +F98. Related to SNCoopDemandTributeInterval
 		unsigned long int unknown_F9C;
@@ -191,6 +193,7 @@ namespace AOE_STRUCTURES {
 		long int averageUpdateAITime_ms; // +1000. Updated each time unknown_1004_time_counter reaches 20 and is reset. "Average UAms" ?
 		long int calcAverageUpdateAITime_counter; // Maximum value = 20 = 0x14
 		long int lastAIUpdateTime_ms; // +1008. A timeGetTime value. (not a game time)
+#endif
 
 		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_TAC_AI; }
 
@@ -201,7 +204,9 @@ namespace AOE_STRUCTURES {
 		// NumberSoldiers = landMilitaryUnits.usedElements
 		// NumberBoats = allBoats.usedElements
 	};
+#ifndef GAMEVERSION_AOK0005030706
 	static_assert(sizeof(STRUCT_TAC_AI) == 0x100C, "STRUCT_TAC_AI size");
+#endif
 
 
 }

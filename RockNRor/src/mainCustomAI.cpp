@@ -227,7 +227,11 @@ void CustomPlayerAI::OnUnitAttacked(AOE_STRUCTURES::STRUCT_TAC_AI *tacAI, AOE_ST
 		// Use an approximate filter on position to reduce the number of calls to panic mode method.
 		// More precise checks are run there, this is just an optimization !
 		bool panicModeIsEligible = CUSTOM_AI::CustomAIMilitaryInfo::IsPanicModeEligible(myTC, myUnit, enemyUnit);
+#ifdef GAMEVERSION_AOK0005030706
+		long int timeSinceLastPanicMode_ms = global->currentGameTime;
+#else
 		long int timeSinceLastPanicMode_ms = (global->currentGameTime - tacAI->lastPanicModeStrategyUpdateTime);
+#endif
 		panicModeIsEligible &= (timeSinceLastPanicMode_ms >= (ROCKNROR::crInfo.configInfo.panicModeDelay * 1000));
 		if (panicModeIsEligible) {
 			ROCKNROR::STRATEGY::ManagePanicMode(tacAI->ptrMainAI, enemyPlayerId, &this->militaryAIInfo);

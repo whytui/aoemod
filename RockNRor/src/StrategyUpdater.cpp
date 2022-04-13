@@ -1082,9 +1082,11 @@ void STRATEGY::ManagePanicMode(AOE_STRUCTURES::STRUCT_AI *mainAI, long int enemy
 		}
 	}
 
+#ifndef GAMEVERSION_AOK0005030706
 	if (strategyUpdated && GetGameGlobalStructPtr()) {
 		tacAI->lastPanicModeStrategyUpdateTime = GetGameGlobalStructPtr()->currentGameTime;
 	}
+#endif
 
 	// If NOT panic mode, cancel panic mode units that are not being trained (no need to train them anymore). Too late for "in progress" ones...
 	// Limitation: this "clean" can only be executed if I am attacked but out of my town :(

@@ -48,8 +48,15 @@ namespace AOE_STRUCTURES {
 		long int SNNumber[0xE2]; // +26C. only used in init phases ? 0xE2 IS the correct count here cf 0x49C540.
 		unsigned long int unknown_5F4; // NOT a SN number, but part of victory condition rule system ?
 		// 0x5F8: end
+
+#ifdef GAMEVERSION_AOK0005030706
+		unsigned long int unknown_aok_5F8;
+		unsigned long int unknown_aok_5FC;
+#endif
 	};
+#ifndef GAMEVERSION_AOK0005030706
 	static_assert(sizeof(STRUCT_STRATEGY_AI) == 0x5F8, "STRUCT_STRATEGY_AI size");
+#endif
 
 
 }

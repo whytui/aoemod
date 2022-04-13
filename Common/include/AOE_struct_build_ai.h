@@ -17,9 +17,15 @@ namespace AOE_STRUCTURES {
 	// External dependencies
 	class STRUCT_AI;
 
+#ifndef GAMEVERSION_AOK0005030706
 #define CHECKSUM_BUILD_AI_PARENT 0x542A40
 #define CHECKSUM_BUILD_AI 0x00548ACC
+#endif
 
+#ifdef GAMEVERSION_AOK0005030706
+#define CHECKSUM_BUILD_AI_PARENT 0
+#define CHECKSUM_BUILD_AI 0x005B16E8 // see 0x4FCFEA, 0x4FD061
+#endif
 	// Size 0x5C0 - Constructor 0x4B7650
 	// Checksums: CC 8A 54 00 (normal), parent=40 2A 54 00
 	class STRUCT_BUILD_AI {
@@ -39,9 +45,16 @@ namespace AOE_STRUCTURES {
 		STRUCT_MANAGED_ARRAY autoInsertedBuildingDATIDs; // +5AC. Actually, IDs are DATID, not unit instance IDs. Automatically added buildings ?
 		STRUCT_AI *mainAI; // +5BC. Set in 0x4B76E0.
 		// 0x5C0: end
+
+#ifdef GAMEVERSION_AOK0005030706
+		unsigned long int unknown_aok[0x808/4]; // 808 additional bytes
+#endif
+
 		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_BUILD_AI; }
 	};
+#ifndef GAMEVERSION_AOK0005030706
 	static_assert(sizeof(STRUCT_BUILD_AI) == 0x5C0, "STRUCT_BUILD_AI Size");
+#endif
 
 
 }

@@ -482,6 +482,9 @@ void RockNRorInstance::DispatchToCustomCode(REG_BACKUP *REG_values) {
 	case 0x5864AB:
 		this->OnLogCloseAOK(REG_values);
 		break;
+	case 0x44EB8E:
+		this->ReadTextFromChat(REG_values);
+		break;
 #endif
 	default:
 		break;
@@ -616,7 +619,24 @@ void RockNRorInstance::ReadTextFromChat(REG_BACKUP *REG_values) {
 	long int myECX = REG_values->ECX_val;
 	char *txt = (char *)myEAX;
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
+#ifdef GAMEVERSION_AOK0005030706
+		long int callAddr = 0x004AB820;
+		auto settings = GetGameSettingsPtr();
+		auto global = settings->ptrGlobalStruct;
+		auto player1 = global->GetPlayerStruct(1);
+		auto player2 = global->GetPlayerStruct(2);
+		std::string txt = "";
+		if (player2 && player2->ptrAIStruct) {
+			for (int i = 0; i < 226; i++) {
+				txt += std::to_string(i);
+				txt += " : ";
+				txt += std::to_string(player2->ptrAIStruct->structTacAI.SNNumber[i]);
+				txt += "\n";
+			}
+		}
+#else
 		long int callAddr = 0x00480760;
+#endif
 		_asm {
 			MOV EAX, myEAX;
 			PUSH EAX;
@@ -1273,7 +1293,9 @@ void RockNRorInstance::TacAIOnUnitAttacked(REG_BACKUP *REG_values) {
 	ror_api_assert(REG_values, myUnit->unitInstanceId == myUnitId);
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 		REG_values->fixesForGameEXECompatibilityAreDone = true;
+#ifndef GAMEVERSION_AOK0005030706
 		REG_values->EDX_val = tacAI->attacksByPlayerCount[enemyPlayerId]; // 0x4D7AE1
+#endif
 	}
 
 	if (ROCKNROR::crInfo.configInfo.doNotApplyFixes) {
@@ -5015,7 +5037,7 @@ void RockNRorInstance::OnDeleteFile(REG_BACKUP *REG_values) {
 
 
 #ifdef GAMEVERSION_AOK0005030706
-// From 0x5864AB
+// From 0x5864AB. With null pointer exception when ESI is NULL
 void RockNRorInstance::OnLogCloseAOK(REG_BACKUP *REG_values) {
 	REG_values->EDI_val = 0xFFFFFFFF;
 	REG_values->fixesForGameEXECompatibilityAreDone = true;

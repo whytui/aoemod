@@ -152,10 +152,15 @@ namespace AOE_STRUCTURES {
 	static_assert(sizeof(STRUCT_PLAYER_VISIBLE_RESOURCE_MANAGER) == 0x14, "STRUCT_PLAYER_VISIBLE_RESOURCE_MANAGER size");
 
 
-
+#ifndef GAMEVERSION_AOK0005030706
 #define CHECKSUM_RGE_PLAYER 0x00544D18 // Base class. Size=0x224 cf 0x51CF39?
 #define CHECKSUM_PLAYER 0x00549A44 // Normal player (non-gaia)
 #define CHECKSUM_GAIA_PLAYER 0x00549B80 // ccor=0x4F71C0
+#else
+#define CHECKSUM_RGE_PLAYER 0x005B3008 // Base class. Size=?
+#define CHECKSUM_PLAYER 0 // Normal player (non-gaia)
+#define CHECKSUM_GAIA_PLAYER 0 // ccor=?
+#endif
 	// PLAYER. Constructor=0x4EFB00 : ccor(globalStruct, civDef, numPlayer, playerName, civId, isComputer, arg7, arg8, arg9, arg10)
 	// RGE_Player ccor=0x45B410, 0x45B6A0, last virtual method=+0xF4
 	// Standard player struct sizes are 0x85C (gaia) or 0x84C (non-gaia).
@@ -208,15 +213,24 @@ namespace AOE_STRUCTURES {
 		long int isComputerControlled; // 0/1. Mostly for "military" behaviours, not for MainAI-related behaviours.
 		long int pathingAttemptCap; // +08. Unsure. value is from [55473C] ? "numberGroupsValue" ?
 		long int pathingDelayCap; // +0C. Unsure. "maxNumberGroupsValue" ? See 0x45C180
+#ifdef GAMEVERSION_AOK0005030706
+		unsigned long int unknown_aok_TODO_10;
+#endif
 		// 0x10
 		long int currentUpdatePathingAttempts; // Used in-game, not initialized in editor. Reset in DoUpdates(0x45D040). Inc in 0x45C1C0
 		long int playerChecksumValue; // +14. Used to check sync in MP games ? Cf 0x45CE70.
 		unsigned long int unknown_018; // Unused ?
 		unsigned long int unknown_01C; // Unused ?
 		// 0x20
+#ifdef GAMEVERSION_AOK0005030706
+		//char playerHasChecksum; // +20. Used to check sync in MP games ? Cf 0x45CE70.
+		//char unknown_021;
+		long int structDefUnitArraySize; // +22. Number of elements in ptrStructDefUnitTable array = number of "unit definitions" for this player.
+#else
 		char playerHasChecksum; // +20. Used to check sync in MP games ? Cf 0x45CE70.
 		char unknown_021;
 		short int structDefUnitArraySize; // +22. Number of elements in ptrStructDefUnitTable array = number of "unit definitions" for this player.
+#endif
 		STRUCT_UNITDEF_BASE **ptrStructDefUnitTable; // ptr to Array containing pointers to all player unitDefs (index=DATID). They can be NULL (not available/invalid). See also structDefUnitArraySize.
 		STRUCT_OBJECT_LIST *ptrCreatableUnitsListLink; // +28. Only building/living + smoke, dead units...?
 		STRUCT_OBJECT_LIST *ptrNonCreatableUnitsListLink; // Others than building/living ?
@@ -228,6 +242,19 @@ namespace AOE_STRUCTURES {
 		// 0x40
 		STRUCT_PLAYER_BUILDINGS_HEADER *ptrBuildingsListHeader;
 		char *playerName_length16max; // pointer to player name (max length=0x10)
+#ifdef GAMEVERSION_AOK0005030706
+		short int playerId; // 0x4C ? (4A in ror)
+		short int unknown_aok_52;
+		char AIControlMode; // 1=human, 2=gaia, 3=computer. Do not customize it. It is important when loading/saving, impacts destructor...
+		char unknown_049; // value 2?
+		short int resourcesCount; // 0x54 (0x4C in ror). Number of resources (0x3A = 58 in standard game)
+	private:
+		// 0x4E - Unused in standard game. Used by "ManageAI" mod to enable(1)/disable(0) AI control.
+		// Check if "ManageAI" feature is installed before using this. => Use IsAIActive(...) instead of using this directly
+		// It is not recommended to enable (value 1) this flag if AIControlMode!=3 (player not compatible with AI handling)
+		char unused_customAIFlag; // ??
+		char unused_04F; // ??
+#else
 		char AIControlMode; // 1=human, 2=gaia, 3=computer. Do not customize it. It is important when loading/saving, impacts destructor...
 		char unknown_049;
 		short int playerId; // 0x4A
@@ -237,21 +264,26 @@ namespace AOE_STRUCTURES {
 		// Check if "ManageAI" feature is installed before using this. => Use IsAIActive(...) instead of using this directly
 		// It is not recommended to enable (value 1) this flag if AIControlMode!=3 (player not compatible with AI handling)
 		char unused_customAIFlag;
-	public:
 		char unused_04F;
+#endif // !GAMEVERSION_AOK0005030706
+	public:
 		// 0x50
 		float *ptrResourceValues; // To get a resource value: player->ptrResourceValues[CST_RES_ORDER_xxx]). Initialized using civDef resource values at 0x45B960.
+#ifdef GAMEVERSION_AOK0005030706
+		//unsigned long int unknown_aok_5C; // value 0x190 ?
+#else
 		char tileSet; // +54. Civilization tileset, 5 max (0-4). 4 is ROR's added tileset.
 		char unknown_055_unused[3];
+#endif
 		STRUCT_PLAYER_NEW_EXPLORED_TILES newExploredTilesForInfAI; // +58. New explored tiles. Read/reset in "manageInfAI". It is non-empty only temporarily ! Avoid using this directly.
 		STRUCT_PLAYER_NEW_EXPLORED_TILES newExploredTilesForDiamMap; // +6C. For diamond map (for human-controlled). It is non-empty only temporarily ! 0x5179A9: JMP to prevent from refreshing diamMap.
 		// 0x80
-		char aliveStatus; //0=alive, 1=win 2=lost.
-		char isInactive; // +81. 1 for resigned/disconnected ? 0x45BBE3. "isResigned"
-		short int unknown_082; // unused ?
+		//char aliveStatus; //0=alive, 1=win 2=lost.
+		//char isInactive; // +81. 1 for resigned/disconnected ? 0x45BBE3. "isResigned"
+		//short int unknown_082; // unused ?
 		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES *ptrDiplomacyStances; // +84. [pointer+iPlayerId] = diplomacy value: 0=ally,1=neutral, 3=enemy. gaia&self are neutral ! "relation"
-		char unknown_088;
-		char unknown_089[3]; // unused ?
+		//char unknown_088;
+		//char unknown_089[3]; // unused ?
 		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES diplomacyVSPlayers[9]; // +8C. Diplomacy against gaia(p0), p1, p2... 1=self, 2=allied, 3=neutral, 4=enemy. Long ints (4bytes each)
 		// 0xB0
 		long int unknown_0B0[9]; // B0: bool (dword) per playerId, related to visibility/exploration ? (and to player that is human-controlled ?)
@@ -327,6 +359,20 @@ namespace AOE_STRUCTURES {
 		// ONLY USE THIS if "selected units" feature is installed or you will access bad memory.
 		STRUCT_UNIT_BASE *custom_mainSelectedUnit; // +0x85C. See GetRelevantMainSelectedUnitPointer (in RockNRorInfo)
 		STRUCT_UNIT_BASE *custom_selectedUnits[CST_RS_MAX_SUPPORTED_SELECTED_UNITS]; // +860. See GetRelevantSelectedUnitsPointer (in RockNRorInfo)
+
+
+#ifdef GAMEVERSION_AOK0005030706
+		char playerHasChecksum; // +20. Used to check sync in MP games ? Cf 0x45CE70.
+		char unknown_021;
+
+		char tileSet; // +54. Civilization tileset, 5 max (0-4). 4 is ROR's added tileset.
+		char unknown_055_unused[3];
+
+		char aliveStatus; //0=alive, 1=win 2=lost.
+		char isInactive; // +81. 1 for resigned/disconnected ? 0x45BBE3. "isResigned"
+		short int unknown_082; // unused ?
+#endif
+
 
 		STRUCT_GAME_GLOBAL *GetGlobalStruct() const {
 			return (STRUCT_GAME_GLOBAL*) this->ptrGlobalStruct;

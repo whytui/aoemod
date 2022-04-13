@@ -200,6 +200,10 @@ namespace AOE_STRUCTURES {
 		char learnUHFileName[0x100]; // +0xFF90. Name of xxx.uh file. Not sure this is really used.
 		// 0x10090: end
 
+#ifdef GAMEVERSION_AOK0005030706
+		unsigned long int unknown_aok[0x804 / 4]; // 804 additional bytes
+#endif
+
 		bool IsCheckSumValid() const { return this->checksum == CHECKSUM_INF_AI; }
 
 		// Get AI's exploration status of a specific tile
@@ -207,7 +211,9 @@ namespace AOE_STRUCTURES {
 			return (AOE_CONST_INTERNAL::INFAI_TILE_EXPLORATION_STATUS)this->mapExplorationInfo.GetTileValue(posX, posX, 0xFF);
 		}
 	};
+#ifndef GAMEVERSION_AOK0005030706
 	static_assert(sizeof(STRUCT_INF_AI) == 0x10090, "STRUCT_INF_AI size");
+#endif
 
 
 }

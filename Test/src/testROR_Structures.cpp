@@ -105,7 +105,9 @@ static bool test_ror_structures() {
 	trs_assert(&ai, 0x1146C + 0x194, &ai.structTacAI.SNNumber);
 	trs_assert(&ai, 0x1146C + 0xD78, &ai.structTacAI.gathererCount_desired);
 	trs_assert(&ai, 0x1146C + 0x51C, &ai.structTacAI.gatherersTasks);
+#ifndef GAMEVERSION_AOK0005030706
 	trs_assert(&ai, 0x1146C + 0xF94, &ai.structTacAI.lastPanicModeStrategyUpdateTime);
+#endif
 	trs_assert(&ai, 0x12478, &ai.structTradeAI);
 	trs_assert(&ai.structTradeAI, 0xF0, &ai.structTradeAI.ptrMainAI);
 	trs_assert(&ai, 0x12568, &ai.structTradeAI.ptrMainAI);

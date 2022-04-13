@@ -109,7 +109,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_ROR_API_AOE10c 6
 #define COUNT_ROR_API_10b 6
 #define COUNT_ROR_API_10c 143
-#define COUNT_ROR_API_AOK0005030706 4
+#define COUNT_ROR_API_AOK0005030706 5
 #define COUNT_manageAI_10c 13
 #define COUNT_audio_video_10c 9
 #define COUNT_larger_maps_10c 38
@@ -5714,9 +5714,19 @@ void AOE_binData::InitROR_API_AOK0005030706() {
 	NEXT_INITSEQ_2_NOVAR(this->ROR_API_AOK0005030706.GetBinSeqDefinition(i),
 		ROR_API_FixCrashCloseLogFile,
 		"ROR_API optional change. fix a crash that occurs silently when the game exits",
-		0x001858A5,
+		0x1858A5,
 		(0x57, 0x83, 0xCF, 0xFF, 0x8B, 0x46, 0x0C, 0xA8, 0x40), // default=no
 		(0x57, 0xE8, 0x3F, 0x62, 0x01, 0x00, 0x90, 0xA8, 0x40),
+		FM_OFF,
+		FM_ON
+	);
+
+	NEXT_INITSEQ_2_NOVAR(this->ROR_API_AOK0005030706.GetBinSeqDefinition(i),
+		API_ReadTextFromChat,
+		"ROR_API optional change. Read text from chat",
+		0x4DF88,
+		(0x50, 0xE8, 0x92, 0xCC, 0x05, 0x00, 0xEB, 0x40), // default=no
+		(0x90, 0xE8, 0x5C, 0xDB, 0x14, 0x00, 0xEB, 0x40),
 		FM_OFF,
 		FM_ON
 	);
