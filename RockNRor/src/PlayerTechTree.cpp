@@ -1444,62 +1444,96 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
 			outputBonusDescription += "%";
 			bonusIsNotTransmissible = true; // Conversion efficiency applies to the PLAYER, not preserved when units are converted
-		} else {
-			int attackValue = 1;
+		}
+		else if (bonusUnitClass == TribeAIGroupSiegeWeapon) {
+			// Siege weapons : attack values are big enough to use multiply
 			bool useMeleeAttack = isMelee;
-
-			if (bonusUnitClass == TribeAIGroupSiegeWeapon) {
-				TTDetailedUnitDef *pickedUnitDtl = this->PickOneRandomRootUnitIdAmongUnitClass(bonusUnitClass, -1);
-				applyToUnit = (short int)pickedUnitDtl->unitDefId;
-				applyToClass = AOE_CONST_FUNC::TribeAINone;
-				if (applyToUnit >= 0) {
-					applyToNameString = "unit ";
-					std::string name = GetUnitName(applyToUnit);
-					if (!name.empty()) {
-						applyToNameString += name;
-					} else {
-						applyToNameString += std::to_string(applyToUnit);
-					}
+			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
+			// TODO : choose randomly if the effect applies to all siege units ? And adapt weight accordingly IF more than 1 unit is affected
+			TTDetailedUnitDef *pickedUnitDtl = this->PickOneRandomRootUnitIdAmongUnitClass(bonusUnitClass, -1);
+			applyToUnit = (short int)pickedUnitDtl->unitDefId;
+			applyToClass = AOE_CONST_FUNC::TribeAINone;
+			if (applyToUnit >= 0) {
+				applyToNameString = "unit ";
+				std::string name = GetUnitName(applyToUnit);
+				if (!name.empty()) {
+					applyToNameString += name;
 				}
-				attackValue = 5; // +1 would be ridiculous for siege.
-
-				// Just find out if attack to use is melee
-				TTDetailedTrainableUnitDef * asTrainable = (TTDetailedTrainableUnitDef *)pickedUnitDtl; // can cast as here we have siege unit (trainable)
-				if (asTrainable->unitDef) {
-					for (int i = 0; i < asTrainable->unitDef->attacksCount; i++) { // only 1, generally
-						if (asTrainable->unitDef->ptrAttacksList[i].classId == AOE_CONST_FUNC::ATTACK_CLASS::CST_AC_BASE_MELEE) {
-							useMeleeAttack = true;
-						}
-					}
-				}
-			} else {
-				if (bonusUnitClass == TribeAIGroupBuilding) {
-					applyToClass = AOE_CONST_FUNC::TribeAINone;
-					applyToUnit = CST_UNITID_WATCH_TOWER;
-					applyToNameString = "towers";
-				} else if (!useMeleeAttack) {
-					// TODO: add weight when improving attack for non-siege range unit
+				else {
+					applyToNameString += std::to_string(applyToUnit);
 				}
 			}
 
-			// Apply effect on root unit
+			// Just find out if attack to use is melee
+			TTDetailedTrainableUnitDef * asTrainable = (TTDetailedTrainableUnitDef *)pickedUnitDtl; // can cast as here we have siege unit (trainable)
+			if (asTrainable->unitDef) {
+				for (int i = 0; i < asTrainable->unitDef->attacksCount; i++) { // only 1, generally
+					if (asTrainable->unitDef->ptrAttacksList[i].classId == AOE_CONST_FUNC::ATTACK_CLASS::CST_AC_BASE_MELEE) {
+						useMeleeAttack = true;
+					}
+				}
+			}
+			// Set up effect for siege weapons (amounts are big enough to use multiply)
+			newEffect.SetAttributeMultiply(TECH_UNIT_ATTRIBUTES::TUA_ATTACK, applyToClass, applyToUnit, 0);
+			// TODO this does not work
+			int tmpVal = (int)(rndMultiplier * 100);
+			if (tmpVal > 255) {
+				tmpVal = 255;
+			}
+			if (tmpVal < 100) {
+				tmpVal = 100; // No reason to decrease attack here ! And protect against inconsistent values like negatives or even 1 (=1%)
+			}
+			newEffect.SetAttackOrArmorTypeValue(useMeleeAttack ? ATTACK_CLASS::CST_AC_BASE_MELEE : ATTACK_CLASS::CST_AC_BASE_PIERCE, (unsigned char)tmpVal);
+
+			// Text for siege weapons attack bonus
+			if (!doNotWriteInGlobalText) {
+				this->bonusText += "+";
+				this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
+				this->bonusText += "% ";
+				this->bonusText += GetTechUnitAttributeName(unitAttr);
+				this->bonusText += " for ";
+				this->bonusText += applyToNameString.c_str();
+				this->bonusText += NEWLINE;
+			}
+			outputBonusDescription = GetTechUnitAttributeName(unitAttr);
+			outputBonusDescription += " +";
+			outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
+			outputBonusDescription += "%";
+
+			this->techTreeEffects.push_back(newEffect);
+			// Apply effect on children (upgrades)
+			if (applyToUnit >= 0) {
+				this->AddSameEffectForUnitLineage(&newEffect, applyToUnit);
+			}
+		}
+		else {
+			// Other than priests and siege weapons
+			int attackValue = 1;
+			bool useMeleeAttack = isMelee;
+
+			if (bonusUnitClass == TribeAIGroupBuilding) {
+				applyToClass = AOE_CONST_FUNC::TribeAINone;
+				applyToUnit = CST_UNITID_WATCH_TOWER;
+				applyToNameString = "towers";
+			} else if (!useMeleeAttack) {
+				// TODO: add weight when improving attack for non-siege range unit
+			}
+
+			// Set up effect (other than siege weapons)
 			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
 			newEffect.SetAttributeAdd(unitAttr, applyToClass, applyToUnit, 0); // need to set value using SetAttackOrArmorTypeValue
 			if (useMeleeAttack) {
 				newEffect.SetAttackOrArmorTypeValue(ATTACK_CLASS::CST_AC_BASE_MELEE, attackValue);
 				assert(newEffect.GetAttackOrArmorType() == ATTACK_CLASS::CST_AC_BASE_MELEE);
 				assert(newEffect.GetValue() == attackValue);
-			} else {
+			}
+			else {
 				newEffect.SetAttackOrArmorTypeValue(ATTACK_CLASS::CST_AC_BASE_PIERCE, attackValue);
 				assert(newEffect.GetAttackOrArmorType() == ATTACK_CLASS::CST_AC_BASE_PIERCE);
 				assert(newEffect.GetValue() == attackValue);
 			}
-			this->techTreeEffects.push_back(newEffect);
-			// Apply effect on children (upgrades)
-			if (applyToUnit >= 0) {
-				this->AddSameEffectForUnitLineage(&newEffect, applyToUnit);
-			}
 
+			// Text (for others than priests, siege)
 			if (!doNotWriteInGlobalText) {
 				this->bonusText += "+";
 				this->bonusText += std::to_string(attackValue);
@@ -1512,6 +1546,12 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			outputBonusDescription = GetTechUnitAttributeName(unitAttr);
 			outputBonusDescription += " +";
 			outputBonusDescription += std::to_string(attackValue);
+
+			this->techTreeEffects.push_back(newEffect);
+			// Apply effect on children (upgrades)
+			if (applyToUnit >= 0) {
+				this->AddSameEffectForUnitLineage(&newEffect, applyToUnit);
+			}
 		}
 	}
 

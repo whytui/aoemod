@@ -89,6 +89,7 @@ bool UnitDefApplyMultiplyEffect(STRUCT_UNITDEF_BASE *unitDef, float value, AOE_C
 	ATTACK_CLASS armorOrAttackClass = STRUCT_TECH_DEF_EFFECT::GetAttackClassFromFloatValue(value); // only relevant for attributes 8/9
 
 	// The "apply multiply effect" method in ROR is NOT IMPLEMENTED for attributes ARMOR/ATTACK.
+	// We implement it here. As allowed values can only be integers in [0;255], we use them as percentages so the range is 0% to 255%
 	switch (attribute) {
 	case TECH_UNIT_ATTRIBUTES::TUA_ARMOR:
 		if (unitDefAttackable) {

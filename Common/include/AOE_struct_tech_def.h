@@ -105,13 +105,14 @@ namespace AOE_STRUCTURES {
 			}
 			return GetAttackClassFromFloatValue(this->effectValue);
 		}
-		// Set armor/attack class and amount if effect is "attribute modifier" and attribute is armor or attack. Amount must be 0<=x< 256
+		// Set armor/attack class and amount if effect is "attribute modifier" and attribute is armor or attack. Amount must be 0<=x<256
 		void SetAttackOrArmorTypeValue(AOE_CONST_FUNC::ATTACK_CLASS attackOrArmorType, unsigned char value) {
 			if (!this->IsAttributeModifier()) { return; }
 			this->effectValue = ((float)attackOrArmorType) * 256;
 			this->effectValue += value; // amount must be between 0 and 255
 		}
-		// Set all fields for Attribute Modifier (multiply) effect. If attribute is armor or attack, please set "value" using SetAttackOrArmor afterwards
+		// Set all fields for Attribute Modifier (multiply) effect.
+		// If attribute is armor or attack, please set "value" using SetAttackOrArmor afterwards, but the value would need to be integer 0-255 and used as a % by RockNRor !
 		void SetAttributeMultiply(TECH_UNIT_ATTRIBUTES attribute, GLOBAL_UNIT_AI_TYPES unitClass, short int unitDefId, float multiplierValue) {
 			this->effectType = TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_MULT;
 			this->effectAttribute = attribute;
@@ -119,7 +120,8 @@ namespace AOE_STRUCTURES {
 			this->effectUnit = unitDefId;
 			this->effectValue = multiplierValue;
 		}
-		// Set all fields for Attribute Modifier (add) effect. If attribute is armor or attack, please set "value" using SetAttackOrArmor afterwards
+		// Set all fields for Attribute Modifier (add) effect.
+		// If attribute is armor or attack, please set "value" using SetAttackOrArmor afterwards, but the value would need to be integer 0-255 and used as a % by RockNRor !
 		void SetAttributeAdd(TECH_UNIT_ATTRIBUTES attribute, GLOBAL_UNIT_AI_TYPES unitClass, short int unitDefId, float addValue) {
 			this->effectType = TECH_DEF_EFFECTS::TDE_ATTRIBUTE_MODIFIER_ADD;
 			this->effectAttribute = attribute;
