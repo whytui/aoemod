@@ -386,7 +386,7 @@ void TechTreeCreator::SetConfigFromStatistics() {
 	// *** WARNING : at this point we disable researches individually, not using research lines !!! ***
 	int bronzeIronResearchLinesCount = ROCKNROR::crInfo.techTreeAnalyzer.statistics.rootNonShadowResearchesCountByAge[2] + ROCKNROR::crInfo.techTreeAnalyzer.statistics.rootNonShadowResearchesCountByAge[3];
 	bronzeIronResearchLinesCount -= 3; // Exclude bronze/iron age, wheel TODO should be more generic
-	bronzeIronResearchLinesCount -= 2; // Exclude walls TODO should be more geenric
+	bronzeIronResearchLinesCount -= 2; // Exclude walls TODO should be more generic
 	int minDisableResearchLines = (bronzeIronResearchLinesCount * TT_CONFIG::CALC_MIN_DISABLE_RESEARCH_COUNT_PERCENT) / 100;
 	int maxDisableResearchLines = (bronzeIronResearchLinesCount * TT_CONFIG::CALC_MAX_DISABLE_RESEARCH_COUNT_PERCENT) / 100;
 	if (bronzeIronResearchLinesCount < 10) {
@@ -541,9 +541,18 @@ void TechTreeCreator::SetResearchBaseProbabilities() {
 				crResInfo->rawDisableProbability = TT_CONFIG::RES_PROBA_STANDARD_RESEARCH;
 				crResInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_RESEARCH;
 			} else {
+				// Higher disable probability for advanced shieds (others than bronze shield)
 				crResInfo->rawDisableProbability = TT_CONFIG::RES_PROBA_SPECIALIZED_RESEARCH;
 				crResInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_RESEARCH;
 			}
+		}
+		if ((crResInfo->rawDisableProbability < 0) && (attackClass == ATTACK_CLASS::CST_AC_BASE_MELEE) && 
+			(crResInfo->researchDetail->requiredAge >= AOE_CONST_FUNC::CST_RSID_IRON_AGE) &&
+			(crResInfo->researchLocation == AOE_CONST_FUNC::CST_UNITID_STORAGE_PIT)
+			) {
+			// Higher disable probability for iron-age melee attack improvement (+3 in standard game)
+			crResInfo->rawDisableProbability = TT_CONFIG::RES_PROBA_SPECIALIZED_RESEARCH;
+			crResInfo->disableWeight = TT_CONFIG::RES_WEIGHT_STANDARD_RESEARCH;
 		}
 	}
 
@@ -992,7 +1001,7 @@ double TechTreeCreator::CreateOneBonus() {
 	}) != this->classesWithBonus.cend());
 
 	std::map<GLOBAL_UNIT_AI_TYPES, BonusGenProperties> propsByUnitClass;
-	// Add a class with specific "weight" and probability
+	// Add a class with specific "weight" and probability (double, 1 being median probability)
 	auto _addClass = [&](GLOBAL_UNIT_AI_TYPES unitClass, double weight, double proba){
 		bool alreadyABonusThere = false;
 		TTDetailedUnitClass *tmpUcDetail = ROCKNROR::crInfo.techTreeAnalyzer.GetDetailedUnitClass(unitClass);
@@ -1008,13 +1017,35 @@ double TechTreeCreator::CreateOneBonus() {
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupArcher, 0.35, 0.9);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupBuilding, 0.2, 0.95);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariot, 0.55, 0.97);
-	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher, 0.4, 0.9);
-	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, 0.2, 1.08 );
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupCivilian, 0.2, 1.09 );
 	//_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFishingBoat, 0.1, 0.70);// is water map
-	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher, 0.35, 0.99);
-	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, 0.4, 0.98);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupFootSoldier, 0.55, 1);
-	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher, 0.7, 1);
+	
+	// Mounted archers : use one common bonus as specific bonuses on chariot or elephant archers are too poor/specific
+	// Use horse archer class here, but we'll apply several actual bonuses
+	// The weight should take into account what classes are actually available in tech tree (especially horse archers)
+	bool hasHorseArcher = unitLinesByUnitClass[GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher] > 0;
+	bool hasElephantArcher = unitLinesByUnitClass[GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantArcher] > 0;
+	bool hasChariotArcher = unitLinesByUnitClass[GLOBAL_UNIT_AI_TYPES::TribeAIGroupChariotArcher] > 0;
+	if ((hasChariotArcher || hasElephantArcher || hasHorseArcher) && (this->classIdThatStandsForMountedArchersBonus < 0)) {
+		// At least one mounted archer unit is enabled - and there isn't already a bonus for mounted archers
+		double tmpWeight = hasHorseArcher ? 0.6 : 0.2;
+		if (hasElephantArcher) { tmpWeight += 0.15; }
+		if (hasChariotArcher) { tmpWeight += 0.2; }
+		// According to conditions, final tmpWeight will be between 0.35 (only elephant archer) and 1 (all)
+		_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher, tmpWeight, 1);
+	}
+	if (hasHorseArcher) {
+		this->classIdThatStandsForMountedArchersBonus = TribeAIGroupHorseArcher;
+	}
+	else if (hasElephantArcher) {
+		this->classIdThatStandsForMountedArchersBonus = TribeAIGroupElephantArcher;
+	}
+	else if (hasChariotArcher) {
+		this->classIdThatStandsForMountedArchersBonus = TribeAIGroupChariotArcher;
+	}
+	
+	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupElephantRider, 0.4, 0.98); // melee elephants
 	// TODO: for TribeAIGroupMountedSoldier, treat unit by unit ?
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupMountedSoldier, 0.4, 1);
 	_addClass(GLOBAL_UNIT_AI_TYPES::TribeAIGroupPhalanx, 0.5, 1);
@@ -1048,7 +1079,11 @@ double TechTreeCreator::CreateOneBonus() {
 		GLOBAL_UNIT_AI_TYPES curClass = (*iter).first;
 		auto ittmp = std::find(this->classesWithBonus.begin(), this->classesWithBonus.end(), curClass);
 		bool toRemove = (ittmp != this->classesWithBonus.end()); // If already a bonus, remove
-		toRemove |= (unitLinesByUnitClass[curClass] == 0); // If no impacted unit, remove too
+		
+		if (curClass != GLOBAL_UNIT_AI_TYPES::TribeAIGroupHorseArcher) {
+			// If no impacted unit, remove too. Ignore mounted archers, that have been analyzed already (multiple unit classes involved)
+			toRemove |= (unitLinesByUnitClass[curClass] == 0);
+		}
 		if (toRemove) {
 			// Found: current unit class already got a bonus, exclude from "eligible" for this round
 			propsByUnitClass.erase(iter++);
@@ -1073,7 +1108,7 @@ double TechTreeCreator::CreateOneBonus() {
 	bool isRanged = (chosenClass == TribeAIGroupArcher) || (chosenClass == TribeAIGroupChariotArcher) ||
 		(chosenClass == TribeAIGroupElephantArcher) || (chosenClass == TribeAIGroupHorseArcher) ||
 		(chosenClass == TribeAIGroupPriest) || (chosenClass == TribeAIGroupSiegeWeapon) ||
-		(chosenClass == TribeAIGroupSlinger) || (chosenClass == TribeAIGroupUnused_Tower) || (chosenClass == TribeAIGroupWarBoat); // Warning: wrong for filre galley
+		(chosenClass == TribeAIGroupSlinger) || (chosenClass == TribeAIGroupUnused_Tower) || (chosenClass == TribeAIGroupWarBoat); // Warning: wrong for fire galley
 
 	bool isMelee = (chosenClass == TribeAIGroupChariot) || (chosenClass == TribeAIGroupElephantRider) ||
 		(chosenClass == TribeAIGroupFootSoldier) || (chosenClass == TribeAIGroupMountedSoldier) ||
@@ -1182,7 +1217,30 @@ double TechTreeCreator::CreateOneBonus() {
 	if (minBonusRate > maxBonusRate) { minBonusRate = maxBonusRate; }
 	
 	// additionalWeight is 0 in most cases. Used for very specific cases where bonus has a higher impact than expected
-	double additionalWeight = this->CreateOneBonusEffect(chosenClass, chosenAttr, minBonusRate, maxBonusRate, unitLinesByUnitClass[chosenClass]);
+	int usedBonusRate = randomizer.GetRandomValue_normal_moderate(minBonusRate, maxBonusRate);
+	
+	if (chosenClass == TribeAIGroupHorseArcher) {
+		if (usedBonusRate > 0) {
+			// Force using the same bonus rate (supposed to be the same bonus applied to several classes)
+			minBonusRate = maxBonusRate = usedBonusRate;
+		}
+		// In this method TribeAIGroupHorseArcher represents all mounted archers. Add bonuses for other actual unit classes involved
+		if (hasElephantArcher) {
+			// Need to apply specific rules that did not apply for horse archer class
+			int cappedBonusRate = maxBonusRate;
+			if ((chosenAttr == TUA_HP) && (usedBonusRate > ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MAX_RATE_BASE)) {
+				this->elephantArchersHaveLowerBonus = true;
+				cappedBonusRate = ROCKNROR::STRATEGY::TT_CONFIG::GEN_BONUS_MIN_RATE_BASE;
+			}
+			this->CreateOneBonusEffect(TribeAIGroupElephantArcher, chosenAttr, cappedBonusRate, unitLinesByUnitClass[TribeAIGroupElephantArcher]);
+		}
+		if (hasChariotArcher) {
+			// Chariot archer has the same rules as horse archer, we can use the same parameters
+			this->CreateOneBonusEffect(TribeAIGroupChariotArcher, chosenAttr, usedBonusRate, unitLinesByUnitClass[TribeAIGroupChariotArcher]);
+		}
+	}
+	double additionalWeight = this->CreateOneBonusEffect(chosenClass, chosenAttr, usedBonusRate, unitLinesByUnitClass[chosenClass]);
+
 	result = (chosenWeight + chosenAttrWeight) / 2 + additionalWeight;
 
 	// Calculate the "average" weight so that caller can evaluate how strong the current set of bonuses is.
@@ -1205,16 +1263,19 @@ double TechTreeCreator::CreateOneBonus() {
 
 // Returns the weight to be added. 0 in most cases, !=0 for special cases
 double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES bonusUnitClass,
-	TECH_UNIT_ATTRIBUTES unitAttr, int minBonusRate, int maxBonusRate, int availableAffectedUnitLines) {
+	TECH_UNIT_ATTRIBUTES unitAttr, int usedBonusRate, int availableAffectedUnitLines) {
 	double resultAdditionalWeight = 0.;
 	const char *className = GetUnitClassName(bonusUnitClass);
 	bool isPriest = (bonusUnitClass == TribeAIGroupPriest);
 	bool isMelee = (bonusUnitClass == TribeAIGroupChariot) || (bonusUnitClass == TribeAIGroupElephantRider) ||
 		(bonusUnitClass == TribeAIGroupFootSoldier) || (bonusUnitClass == TribeAIGroupMountedSoldier) ||
 		(bonusUnitClass == TribeAIGroupPhalanx); // true if chosen class represents military melee units
+	bool isHorseArcher = (bonusUnitClass == TribeAIGroupHorseArcher);
+	bool isOtherMountedArcher = (bonusUnitClass == TribeAIGroupChariotArcher) || (bonusUnitClass == TribeAIGroupElephantArcher);
+	bool doNotWriteInGlobalText = false;
 
-	// A float "random" multiplier, e.g. 1.25 for a +25% bonus
-	float rndMultiplier = 1 + (((float)randomizer.GetRandomValue_normal_moderate(minBonusRate, maxBonusRate)) / 100.0f);
+	// the float bonus rate multiplier, e.g. 1.25 for a +25% bonus
+	float rndMultiplier = 1.f + (((float)usedBonusRate) / 100.0f);
 
 	// Create bonus
 	AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES applyToClass = bonusUnitClass; // dest tech effect class id
@@ -1228,7 +1289,7 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			impactedUnitDefIds.push_back(i);
 		}
 	}
-	std::string outputBonusDescription;
+	std::string outputBonusDescription; // Bonus description that will be attached to the unit (class) information
 	bool bonusIsNotTransmissible = false; // True for player-dedicated bonuses, eg priest conversion efficiency or charging rate
 
 	// Cases when we apply to restricted units
@@ -1252,18 +1313,33 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			applyToNameString += std::to_string(applyToUnit);
 		}
 	}
+	// Take into account the mounted archers trick : TribeAIGroupHorseArcher stands for all mounted archers,
+	// and don't write anything in this->bonusText regarding chariot/elephant archer classes
+	if ((applyToUnit < 0) && (bonusUnitClass == this->classIdThatStandsForMountedArchersBonus)) {
+		applyToNameString = "mounted archers";
+		if (this->elephantArchersHaveLowerBonus) {
+			applyToNameString += " (smaller bonus for elephants)";
+		}
+	}
+	if ((isHorseArcher || isOtherMountedArcher) && (this->classIdThatStandsForMountedArchersBonus >= 0) &&
+		(this->classIdThatStandsForMountedArchersBonus != bonusUnitClass)) {
+		// Current class is one of the mounted archers, but not THE main one. Write individual bonus description, but write nothing in "glboal" text
+		doNotWriteInGlobalText = true;
+	}
 
 	if ((unitAttr == TUA_HP) || (unitAttr == TUA_SPEED)) {
 		AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
 		newEffect.SetAttributeMultiply(unitAttr, applyToClass, applyToUnit, rndMultiplier);
 		techTreeEffects.push_back(newEffect);
-		this->bonusText += "Increase ";
-		this->bonusText += GetTechUnitAttributeName(unitAttr);
-		this->bonusText += " by ";
-		this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
-		this->bonusText += "% for ";
-		this->bonusText += applyToNameString.c_str();
-		this->bonusText += NEWLINE;
+		if (!doNotWriteInGlobalText) {
+			this->bonusText += "Increase ";
+			this->bonusText += GetTechUnitAttributeName(unitAttr);
+			this->bonusText += " by ";
+			this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
+			this->bonusText += "% for ";
+			this->bonusText += applyToNameString.c_str();
+			this->bonusText += NEWLINE;
+		}
 		outputBonusDescription = GetTechUnitAttributeName(unitAttr);
 		outputBonusDescription += " +";
 		outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
@@ -1291,13 +1367,15 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->AddSameEffectForUnitLineage(&newEffect, applyToUnit);
 		}
 
-		this->bonusText += "+";
-		this->bonusText += std::to_string(((int)newEffect.effectValue));
-		this->bonusText += " ";
-		this->bonusText += GetTechUnitAttributeName(TUA_RANGE);
-		this->bonusText += " for ";
-		this->bonusText += applyToNameString.c_str();
-		this->bonusText += NEWLINE;
+		if (!doNotWriteInGlobalText) {
+			this->bonusText += "+";
+			this->bonusText += std::to_string(((int)newEffect.effectValue));
+			this->bonusText += " ";
+			this->bonusText += GetTechUnitAttributeName(TUA_RANGE);
+			this->bonusText += " for ";
+			this->bonusText += applyToNameString.c_str();
+			this->bonusText += NEWLINE;
+		}
 		outputBonusDescription = GetTechUnitAttributeName(TUA_RANGE);
 		outputBonusDescription += " +";
 		outputBonusDescription += std::to_string(((int)newEffect.effectValue));
@@ -1339,13 +1417,15 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			this->AddSameEffectForUnitLineage(&newEffect, applyToUnit);
 		}
 
-		this->bonusText += "+1 ";
-		this->bonusText += GetTechUnitAttributeName(unitAttr);
-		this->bonusText += " (";
-		this->bonusText += armorTypeText;
-		this->bonusText += ") for ";
-		this->bonusText += applyToNameString.c_str();
-		this->bonusText += NEWLINE;
+		if (!doNotWriteInGlobalText) {
+			this->bonusText += "+1 ";
+			this->bonusText += GetTechUnitAttributeName(unitAttr);
+			this->bonusText += " (";
+			this->bonusText += armorTypeText;
+			this->bonusText += ") for ";
+			this->bonusText += applyToNameString.c_str();
+			this->bonusText += NEWLINE;
+		}
 		outputBonusDescription = GetTechUnitAttributeName(unitAttr);
 		outputBonusDescription += " +1";
 	}
@@ -1420,13 +1500,15 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 				this->AddSameEffectForUnitLineage(&newEffect, applyToUnit);
 			}
 
-			this->bonusText += "+";
-			this->bonusText += std::to_string(attackValue);
-			this->bonusText += " ";
-			this->bonusText += GetTechUnitAttributeName(unitAttr);
-			this->bonusText += " for ";
-			this->bonusText += applyToNameString.c_str();
-			this->bonusText += NEWLINE;
+			if (!doNotWriteInGlobalText) {
+				this->bonusText += "+";
+				this->bonusText += std::to_string(attackValue);
+				this->bonusText += " ";
+				this->bonusText += GetTechUnitAttributeName(unitAttr);
+				this->bonusText += " for ";
+				this->bonusText += applyToNameString.c_str();
+				this->bonusText += NEWLINE;
+			}
 			outputBonusDescription = GetTechUnitAttributeName(unitAttr);
 			outputBonusDescription += " +";
 			outputBonusDescription += std::to_string(attackValue);
@@ -1448,11 +1530,13 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			if (applyToUnit >= 0) {
 				this->AddSameEffectForUnitLineage(&newEffect, applyToUnit);
 			}
-			this->bonusText += "Increase attack speed by ";
-			this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
-			this->bonusText += "% for ";
-			this->bonusText += applyToNameString.c_str();
-			this->bonusText += NEWLINE;
+			if (!doNotWriteInGlobalText) {
+				this->bonusText += "Increase attack speed by ";
+				this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
+				this->bonusText += "% for ";
+				this->bonusText += applyToNameString.c_str();
+				this->bonusText += NEWLINE;
+			}
 			outputBonusDescription = "Attack speed +";
 			outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
 			outputBonusDescription += "%";
@@ -1461,11 +1545,13 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
 			newEffect.SetResourceMultiply(CST_RES_ORDER_FAITH_RECHARGING_RATE, rndMultiplier);
 			techTreeEffects.push_back(newEffect);
-			this->bonusText += "Increase priest recharging speed by ";
-			this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
-			this->bonusText += "% for ";
-			this->bonusText += applyToNameString.c_str();
-			this->bonusText += NEWLINE;
+			if (!doNotWriteInGlobalText) {
+				this->bonusText += "Increase priest recharging speed by ";
+				this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
+				this->bonusText += "% for ";
+				this->bonusText += applyToNameString.c_str();
+				this->bonusText += NEWLINE;
+			}
 			outputBonusDescription = "Recharging speed +";
 			outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
 			outputBonusDescription += "%";
@@ -1495,10 +1581,12 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			AOE_STRUCTURES::STRUCT_TECH_DEF_EFFECT newEffect;
 			newEffect.SetResourceAdd(CST_RES_ORDER_FARM_FOOD_AMOUNT, (float)bonusAbsoluteAdd);
 			techTreeEffects.push_back(newEffect);
-			this->bonusText += "Increase farm food amount (+";
-			this->bonusText += std::to_string(bonusAbsoluteAdd);
-			this->bonusText += ")";
-			this->bonusText += NEWLINE;
+			if (!doNotWriteInGlobalText) {
+				this->bonusText += "Increase farm food amount (+";
+				this->bonusText += std::to_string(bonusAbsoluteAdd);
+				this->bonusText += ")";
+				this->bonusText += NEWLINE;
+			}
 			outputBonusDescription = "food +";
 			outputBonusDescription += std::to_string(bonusAbsoluteAdd);
 			bonusHasBeenHandled = true;
@@ -1526,9 +1614,8 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 		}
 
 		if (!bonusHasBeenHandled && ((applyToUnit >= 0) || (applyToClass >= 0))) {
-			float tmpHalf = ((maxBonusRate - minBonusRate) / 2.f) + minBonusRate;
 			float carryCapacityAdd = 2;
-			if (rndMultiplier > tmpHalf) {
+			if (usedBonusRate > 50) {
 				carryCapacityAdd = 3;
 			}
 
@@ -1545,11 +1632,13 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 				this->AddSameEffectForUnitLineage(&newEffect, applyToUnit);
 			}
 
-			this->bonusText += "+";
-			this->bonusText += std::to_string((int)carryCapacityAdd);
-			this->bonusText += " carry amount for ";
-			this->bonusText += applyToNameString.c_str();
-			this->bonusText += NEWLINE;
+			if (!doNotWriteInGlobalText) {
+				this->bonusText += "+";
+				this->bonusText += std::to_string((int)carryCapacityAdd);
+				this->bonusText += " carry amount for ";
+				this->bonusText += applyToNameString.c_str();
+				this->bonusText += NEWLINE;
+			}
 			outputBonusDescription = "Carry amount +";
 			outputBonusDescription += std::to_string((int)carryCapacityAdd);
 		}
@@ -1560,11 +1649,13 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 		float fixedMult = (2.f - rndMultiplier); // Is calculated bonus is 25% (1.25), then use (2-1.25)=0.75 factor on costs
 		newEffect.SetAttributeMultiply(unitAttr, applyToClass, applyToUnit, fixedMult);
 		techTreeEffects.push_back(newEffect);
-		this->bonusText += "Decrease cost by ";
-		this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
-		this->bonusText += "% for class ";
-		this->bonusText += className;
-		this->bonusText += NEWLINE;
+		if (!doNotWriteInGlobalText) {
+			this->bonusText += "Decrease cost by ";
+			this->bonusText += std::to_string((int)(rndMultiplier * 100) - 100);
+			this->bonusText += "% for ";
+			this->bonusText += applyToNameString.c_str();
+			this->bonusText += NEWLINE;
+		}
 		outputBonusDescription = "Cost -";
 		outputBonusDescription += std::to_string((int)(rndMultiplier * 100) - 100);
 		outputBonusDescription += "%";

@@ -256,6 +256,8 @@ public:
 		this->lastAverageBonusWeight = 0;
 		this->expectedAverageDisableWeight = 0;
 		this->bonusCount = 0;
+		this->classIdThatStandsForMountedArchersBonus = -1;
+		this->elephantArchersHaveLowerBonus = false;
 		this->bonusTextByClassId.clear();
 		this->nonTransmissibleBonusTextByClassId.clear();
 	}
@@ -286,7 +288,7 @@ public:
 	}
 
 private:
-	std::string bonusText;
+	std::string bonusText; // Text that provides all bonuses information
 	std::map<GLOBAL_UNIT_AI_TYPES, std::string> bonusTextByClassId; // Bonus "text" by unit class id (if any)
 	std::map<GLOBAL_UNIT_AI_TYPES, std::string> nonTransmissibleBonusTextByClassId; // list of bonus descriptions, for bonuses that apply to a specific player (eg conversion efficiency)
 
@@ -295,6 +297,10 @@ private:
 
 	// If true, do not actually create any bonus
 	bool simulationMode;
+
+	// Unit Class ID that stands for all mounted archers, IF a common bonus to mounted archers has been defined. -1 otherwise.
+	short int classIdThatStandsForMountedArchersBonus;
+	bool elephantArchersHaveLowerBonus;
 
 	// Average bonus weight from last calculation
 	double lastAverageBonusWeight;
@@ -338,7 +344,7 @@ private:
 
 	// Returns the weight to be added. 0 in most cases, !=0 for special cases
 	double CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPES bonusUnitClass, TECH_UNIT_ATTRIBUTES unitAttr,
-		int minBonusRate, int maxBonusRate, int availableAffectedUnitLines);
+		int usedBonusRate, int availableAffectedUnitLines);
 
 	// Choose one of the upgrade of rootUnitInfo (or rootUnitInfo) that will be the first unit from the lineage to be unavailable.
 	TTCreatorUnitInfo *PickUnitUpgradeToDisableInUnitLine(TTCreatorUnitInfo *rootUnitInfo);
