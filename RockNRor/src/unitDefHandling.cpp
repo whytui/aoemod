@@ -207,8 +207,8 @@ namespace AOE_STRUCTURES {
 			return -1;
 		}
 
-		short int nbDef = player->structDefUnitArraySize + 1; // new number of unit definitions
-		short int newDATID = player->structDefUnitArraySize;
+		long int nbDef = player->structDefUnitArraySize + 1; // new number of unit definitions
+		short int newDATID = (short int)player->structDefUnitArraySize;
 		long int newSizeInBytes = nbDef * 4;
 		AOE_STRUCTURES::STRUCT_UNITDEF_BASE **oldArray = player->ptrStructDefUnitTable;
 		// Run some checks

@@ -505,10 +505,11 @@ bool RockNRorCommand::ExecuteCommand(char *command, std::string &output) {
 		if (!_strnicmp(subCmd, "control=", 8)) {
 			subCmd += 8;
 			int newId = StrToInt(subCmd, -1);
-			if (((newId <= 0) && (newId < 9))) {
+			if (((newId >= 0) && (newId < 9))) {
 				AOE_METHODS::PLAYER::ChangeControlledPlayer(newId, true);
 				output = "Controlled player#=";
 				output += std::to_string(newId);
+				output += " (AI flags updated)";
 			}
 			return true;
 		}
@@ -947,6 +948,40 @@ void RockNRorCommand::HandleChatCommand(char *command) {
 
 		}
 	}
+
+#ifdef GAMEVERSION_AOK0005030706
+	if (strcmp(command, "mrelephant") == 0) {
+		STRUCT_GAME_GLOBAL *global = GetGameGlobalStructPtr();
+		if (global && global->IsCheckSumValid()) {
+			std::string txt = "";
+			for (int playerId = 1; playerId < 9; playerId++) {
+				STRUCT_PLAYER *player = global->GetPlayerStruct(playerId);
+				if (player && player->ptrAIStruct) {
+					txt += "Player #";
+					txt += std::to_string(playerId);
+					txt += "\n";
+					for (int i = 0; i < 226; i++) {
+						txt += "SN";
+						txt += std::to_string(i);
+						txt += " : ";
+						txt += std::to_string(player->ptrAIStruct->structTacAI.SNNumber[i]);
+						txt += "\n";
+					}
+
+					std::string strat = STRATEGY::ExportStrategyToText(&player->ptrAIStruct->structBuildAI, true);
+					txt += "Strategy (cf .AI files)";
+					txt += strat;
+					txt += "\n";
+					txt += "\n";
+				}
+			}
+			FILE *f;
+			int res = fopen_s(&f, "AOKDebugPER.txt", "w"); // overwrite if already existing
+			fprintf_s(f, txt.c_str());
+			fclose(f);
+		}
+	}
+#endif
 }
 
 

@@ -621,19 +621,6 @@ void RockNRorInstance::ReadTextFromChat(REG_BACKUP *REG_values) {
 	if (!REG_values->fixesForGameEXECompatibilityAreDone) {
 #ifdef GAMEVERSION_AOK0005030706
 		long int callAddr = 0x004AB820;
-		auto settings = GetGameSettingsPtr();
-		auto global = settings->ptrGlobalStruct;
-		auto player1 = global->GetPlayerStruct(1);
-		auto player2 = global->GetPlayerStruct(2);
-		std::string txt = "";
-		if (player2 && player2->ptrAIStruct) {
-			for (int i = 0; i < 226; i++) {
-				txt += std::to_string(i);
-				txt += " : ";
-				txt += std::to_string(player2->ptrAIStruct->structTacAI.SNNumber[i]);
-				txt += "\n";
-			}
-		}
 #else
 		long int callAddr = 0x00480760;
 #endif

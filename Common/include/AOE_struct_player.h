@@ -278,12 +278,16 @@ namespace AOE_STRUCTURES {
 		STRUCT_PLAYER_NEW_EXPLORED_TILES newExploredTilesForInfAI; // +58. New explored tiles. Read/reset in "manageInfAI". It is non-empty only temporarily ! Avoid using this directly.
 		STRUCT_PLAYER_NEW_EXPLORED_TILES newExploredTilesForDiamMap; // +6C. For diamond map (for human-controlled). It is non-empty only temporarily ! 0x5179A9: JMP to prevent from refreshing diamMap.
 		// 0x80
-		//char aliveStatus; //0=alive, 1=win 2=lost.
-		//char isInactive; // +81. 1 for resigned/disconnected ? 0x45BBE3. "isResigned"
-		//short int unknown_082; // unused ?
+#ifndef GAMEVERSION_AOK0005030706
+		char aliveStatus; //0=alive, 1=win 2=lost.
+		char isInactive; // +81. 1 for resigned/disconnected ? 0x45BBE3. "isResigned"
+		short int unknown_082; // unused ?
+#endif
 		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_STANCES *ptrDiplomacyStances; // +84. [pointer+iPlayerId] = diplomacy value: 0=ally,1=neutral, 3=enemy. gaia&self are neutral ! "relation"
-		//char unknown_088;
-		//char unknown_089[3]; // unused ?
+#ifndef GAMEVERSION_AOK0005030706
+		char unknown_088;
+		char unknown_089[3]; // unused ?
+#endif
 		AOE_CONST_INTERNAL::PLAYER_DIPLOMACY_VALUES diplomacyVSPlayers[9]; // +8C. Diplomacy against gaia(p0), p1, p2... 1=self, 2=allied, 3=neutral, 4=enemy. Long ints (4bytes each)
 		// 0xB0
 		long int unknown_0B0[9]; // B0: bool (dword) per playerId, related to visibility/exploration ? (and to player that is human-controlled ?)
