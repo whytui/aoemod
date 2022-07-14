@@ -54,7 +54,7 @@ bool TechTreeAnalyzer::ReadRawDataFromDat() {
 			if (detail->techDef != NULL) { // some shadow researches have effect=-1 (they are useful for dependencies)
 				bool hasValidEffect = false;
 				for (int effectIndex = 0; effectIndex < detail->techDef->effectCount; effectIndex++) {
-					hasValidEffect = detail->techDef->ptrEffects[effectIndex].HasValidEffect();
+					hasValidEffect |= detail->techDef->ptrEffects[effectIndex].HasValidEffect();
 
 					// Special: is AI-supported effect
 					if (detail->techDef->ptrEffects[effectIndex].IsResourceModifier()) {
