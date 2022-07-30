@@ -303,6 +303,24 @@ Save as .scn
 Search unit
 [42180]
 Delete
+[42181]
+Unit instance ID / Unit Definition (DAT) ID
+[42182]
+Unit Class ID
+[42183]
+Owner player ID
+[42184]
+Unit approximate position X/Y
+[42185]
+Position search radius
+[42186]
+Find next
+[42187]
+Not found
+[42188]
+Found unit
+[42189]
+at position
 [42076]
 If you want to set a victory condition on gold amount, type a non-zero value.\nYou need to select "custom" in general victory conditions tab.
 [42077]

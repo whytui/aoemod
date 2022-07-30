@@ -133,6 +133,7 @@
     <ClInclude Include="include\RockNRorSettingsScreen.h" />
     <ClInclude Include="include\RockNRorUIHelper.h" />
     <ClInclude Include="include\saveRockNRorData.h" />
+    <ClInclude Include="include\SearchUnitPopup.h" />
     <ClInclude Include="include\Serializable.h" />
     <ClInclude Include="include\TechEffectHandler.h" />
     <ClInclude Include="include\TTDetailedResearchDef.h" />
@@ -235,6 +236,7 @@
     <ClCompile Include="src\RockNRorSettingsScreen.cpp" />
     <ClCompile Include="src\RockNRorUIHelper.cpp" />
     <ClCompile Include="src\saveRockNRorData.cpp" />
+    <ClCompile Include="src\SearchUnitPopup.cpp" />
     <ClCompile Include="src\TechEffectHandler.cpp" />
     <ClCompile Include="src\TTDetailedResearchDef.cpp" />
     <ClCompile Include="src\GameEventHandler.cpp" />

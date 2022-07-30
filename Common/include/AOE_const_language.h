@@ -196,6 +196,15 @@ const static unsigned long int CRLANG_ID_EXPORT_MAP_FAILED_MESSAGE = 42167;
 const static unsigned long int CRLANG_ID_SAVE_AS_SCN_BTN = 42168;
 const static unsigned long int CRLANG_ID_SEARCH_UNIT_BTN = 42179;
 const static unsigned long int CRLANG_ID_DELETE_BTN = 42180;
+const static unsigned long int CRLANG_ID_UNITID_DATID_LABEL = 42181;
+const static unsigned long int CRLANG_ID_UNIT_CLASS_ID_LABEL = 42182;
+const static unsigned long int CRLANG_ID_OWNER_PLAYER_ID_LABEL = 42183;
+const static unsigned long int CRLANG_ID_UNIT_APPROX_POSITION_LABEL = 42184;
+const static unsigned long int CRLANG_ID_POSITION_RADIUS_LABEL = 42185;
+const static unsigned long int CRLANG_ID_FIND_NEXT_BTN = 42186;
+const static unsigned long int CRLANG_ID_NOT_FOUND = 42187;
+const static unsigned long int CRLANG_ID_FOUND_UNIT_TEXT_1 = 42188;
+const static unsigned long int CRLANG_ID_FOUND_UNIT_TEXT_2 = 42189;
 
 const static unsigned long int CRLANG_ID_EDIT_TRIGGERS = 42072;
 const static unsigned long int CRLANG_ID_GET_STRATEGY = 42073;

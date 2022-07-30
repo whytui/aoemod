@@ -1,7 +1,7 @@
 #pragma once
 #include "../include/EditorScenarioInfoPopup.h"
 #include "../include/GenNewTriggerPopup.h"
-
+#include "../include/SearchUnitPopup.h"
 
 
 
@@ -210,8 +210,11 @@ bool EditorScenarioInfoPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 	}
 
 	if (sender == this->btnSearchUnit) {
-		// TODO search unit popup
-		//this->OpenOtherScreenAndCloseThisOne(nextPopup, false);
+		SearchUnitPopup *nextPopup = new SearchUnitPopup();
+		nextPopup->SetBackgroundTheme(this->GetBackgroundSlpTheme());
+		
+		this->OpenOtherScreenAndCloseThisOne(nextPopup, false);
+		return true;
 	}
 
 	if (sender == this->chkAllowUnitOverlapping) {

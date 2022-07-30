@@ -311,6 +311,24 @@ Sauver au format .scn
 Chercher une unité
 [42180]
 Supprimer
+[42181]
+ID de l'unité / de la définition d'unité (DAT)
+[42182]
+ID de la classe d'unité
+[42183]
+ID du joueur
+[42184]
+Position X/Y approximative de l'unité
+[42185]
+Taille de la zone de recherche
+[42186]
+Suivant
+[42187]
+Introuvable
+[42188]
+Unité trouvée
+[42189]
+à la position
 [42076]
 Pour activer une condition de victoire sur la quantité d'or, saisissez une valeur non nulle.\nVous devez aussi choisir "personnalisé" dans les conditions de victoire générale.
 [42077]
