@@ -1475,7 +1475,6 @@ double TechTreeCreator::CreateOneBonusEffect(AOE_CONST_FUNC::GLOBAL_UNIT_AI_TYPE
 			}
 			// Set up effect for siege weapons (amounts are big enough to use multiply)
 			newEffect.SetAttributeMultiply(TECH_UNIT_ATTRIBUTES::TUA_ATTACK, applyToClass, applyToUnit, 0);
-			// TODO this does not work
 			int tmpVal = (int)(rndMultiplier * 100);
 			if (tmpVal > 255) {
 				tmpVal = 255;
