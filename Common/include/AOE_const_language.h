@@ -194,6 +194,8 @@ const static unsigned long int CRLANG_ID_EXPORT_MAP_TO_BMP_POPUP_TITLE = 42165;
 const static unsigned long int CRLANG_ID_EXPORT_MAP_OK_MESSAGE = 42166;
 const static unsigned long int CRLANG_ID_EXPORT_MAP_FAILED_MESSAGE = 42167;
 const static unsigned long int CRLANG_ID_SAVE_AS_SCN_BTN = 42168;
+const static unsigned long int CRLANG_ID_SEARCH_UNIT_BTN = 42179;
+const static unsigned long int CRLANG_ID_DELETE_BTN = 42180;
 
 const static unsigned long int CRLANG_ID_EDIT_TRIGGERS = 42072;
 const static unsigned long int CRLANG_ID_GET_STRATEGY = 42073;

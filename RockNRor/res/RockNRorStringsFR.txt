@@ -307,6 +307,10 @@ La carte a été sauvée dans le fichier :
 Erreur: la carte n'a pas pu être sauvée dans un fichier
 [42168]
 Sauver au format .scn
+[42179]
+Chercher une unité
+[42180]
+Supprimer
 [42076]
 Pour activer une condition de victoire sur la quantité d'or, saisissez une valeur non nulle.\nVous devez aussi choisir "personnalisé" dans les conditions de victoire générale.
 [42077]

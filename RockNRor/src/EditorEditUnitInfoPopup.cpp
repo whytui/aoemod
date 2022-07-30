@@ -13,6 +13,7 @@ void EditorEditUnitInfoPopup::ResetClassPointers() {
 	this->unit = NULL;
 	this->allSelectedUnits.clear();
 	this->btnOK = NULL;
+	this->btnDeleteUnit = NULL;
 	this->edtStatus = NULL;
 	this->chkbox_s0 = NULL;
 	this->chkbox_s2 = NULL;
@@ -117,7 +118,9 @@ void EditorEditUnitInfoPopup::CreateScreenComponents() {
 		this->cbxPlayerOwner->SetSelectedIndex(this->initialOwner);
 	}
 	// OK button
-	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(LANG_ID_OK, "OK"), this->GetLeftCenteredPositionX(80),
+	int btnLeft = this->GetLeftCenteredPositionX(80 * 2 + 24);
+	this->AddButton(&this->btnOK, localizationHandler.GetTranslation(LANG_ID_OK, "OK"), btnLeft, this->GetScreenSizeY() - 30, 80, 22, 0);
+	this->AddButton(&this->btnDeleteUnit, localizationHandler.GetTranslation(CRLANG_ID_DELETE_BTN, "Delete"), btnLeft + 80 + 24,
 		this->GetScreenSizeY() - 30, 80, 22, 0);
 }
 
@@ -128,6 +131,11 @@ bool EditorEditUnitInfoPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 		this->Validate();
 		this->CloseScreen(false);
 		this->RestoreCursor();
+		return true;
+	}
+	if (sender == this->btnDeleteUnit) {
+		AOE_METHODS::UNIT::CallUnitDestructor(this->unit, true);
+		this->CloseScreen(false);
 		return true;
 	}
 	if (sender->currentState) {

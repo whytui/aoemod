@@ -21,6 +21,7 @@ void EditorScenarioInfoPopup::ResetClassPointers() {
 	this->btnVictoryCondition = NULL;
 	this->btnExtractMapBmp = NULL;
 	this->btnSaveScenarioAsScn = NULL;
+	this->btnSearchUnit = NULL;
 	this->edtPlayerId = NULL;
 	this->lblTitle = NULL;
 	this->chkAllowUnitOverlapping = NULL;
@@ -60,6 +61,7 @@ void EditorScenarioInfoPopup::CreateScreenComponents() {
 	this->AddButton(&this->btnVictoryCondition, localizationHandler.GetTranslation(CRLANG_IDVICTORY_CONDITIONS, "Victory conditions"), btnhPos2, 80, btnSize, 30, 0);
 	this->AddButton(&this->btnExtractMapBmp, localizationHandler.GetTranslation(CRLANG_ID_EXPORT_MAP_TO_BMP_BUTTON, "Extract map BMP"), btnhPos2, 120, btnSize, 30, 0);
 	this->AddButton(&this->btnSaveScenarioAsScn, localizationHandler.GetTranslation(CRLANG_ID_SAVE_AS_SCN_BTN, "Save as .scn"), btnhPos2, 160, btnSize, 30, 0);
+	this->AddButton(&this->btnSearchUnit, localizationHandler.GetTranslation(CRLANG_ID_SEARCH_UNIT_BTN, "Search unit"), btnhPos2, 200, btnSize, 30, 0);
 
 	long int chkSize = 30;
 	long int hSpace = 15;
@@ -205,6 +207,11 @@ bool EditorScenarioInfoPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 			this->OpenOtherScreenAndCloseThisOne(nextPopup, false);
 		}
 		return true;
+	}
+
+	if (sender == this->btnSearchUnit) {
+		// TODO search unit popup
+		//this->OpenOtherScreenAndCloseThisOne(nextPopup, false);
 	}
 
 	if (sender == this->chkAllowUnitOverlapping) {

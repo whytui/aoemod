@@ -61,6 +61,7 @@ private:
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnVictoryCondition;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnExtractMapBmp;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnSaveScenarioAsScn;
+	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnSearchUnit;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkAllowUnitOverlapping;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkDisableHillModeCheck;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *chkDisableTerrainRestrictions;
