@@ -94,7 +94,7 @@ void AOE_binData::SetCurrentVersion(AOE_FILE_VERSION value) {
 #define COUNT_options_10b 15
 #define COUNT_options_10c 61
 #define COUNT_techFixes_10b 5
-#define COUNT_techFixes_10c 37
+#define COUNT_techFixes_10c 38
 #define COUNT_resolution_10b 52
 #define COUNT_resolution_10c 76
 #define COUNT_windowedMode_AOE10b 3
@@ -2245,6 +2245,16 @@ void AOE_binData::InitTechFixes_10c() {
 		FM_OFF,
 		FM_ON
 		);
+
+	NEXT_INITSEQ_2_NOVAR(this->techFixes_10c.GetBinSeqDefinition(i),
+		FixRecyclableSequenceUpdate,
+		"Fix updating sequence for recyclable units.",
+		0x12076D,
+		(0x3B, 0xC2, 0x7D, 0x10, 0x8D, 0x50, 0xFF), // default=no
+		(0x3B, 0xC2, 0x7F, 0x10, 0x8D, 0x50, 0xFF),
+		FM_OFF,
+		FM_ON
+	);
 
 
 	if (i != COUNT_techFixes_10c) {
