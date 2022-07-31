@@ -1,4 +1,6 @@
 #include "../include/SearchUnitPopup.h"
+#include "../include/UI_utilities.h"
+#include "../include/playerHandling.h"
 
 
 namespace ROCKNROR {
@@ -93,7 +95,7 @@ bool SearchUnitPopup::OnButtonClick(STRUCT_UI_BUTTON *sender) {
 		return true;
 	}
 	if (sender == this->btnDoSearch) {
-		this->lastResultUnitId = -1;
+		this->lastResultUnitId = INT_MIN;
 		this->DoSearch();
 		return true;
 	}
@@ -155,11 +157,13 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *SearchUnitPopup::FindUnit(long int playerId, l
 		if (unit != NULL) { return unit; } // A search by instance ID cannot find multiple results anyway
 	}
 
-	if (startSearch < 0) {
-		startSearch = 0;
+	if (startSearch < global->unitIdSeqForTempUnits) {
+		startSearch = global->unitIdSeqForTempUnits + 1;
 	}
+	
 	for (int i = startSearch; i < global->seqUnitId; i++) {
-		unit = global->GetUnitFromId(i);
+		unit = global->GetUnitFromIdAll(i);
+		
 		if ((unit == NULL) || (unit->unitDefinition == NULL) || (unit->ptrStructPlayer == NULL)) { continue; }
 		if ((playerId >= 0) && (unit->ptrStructPlayer->playerId != playerId)) {
 			continue;
@@ -194,7 +198,7 @@ AOE_STRUCTURES::STRUCT_UNIT_BASE *SearchUnitPopup::FindUnit(long int playerId, l
 void SearchUnitPopup::HandleUnitFound(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
 	if (unit == NULL) {
 		this->edtResultInfo->SetText(localizationHandler.GetTranslation(CRLANG_ID_NOT_FOUND, "Not found"));
-		this->lastResultUnitId = -1;
+		this->lastResultUnitId = INT_MIN;
 		return;
 	}
 	this->lastResultUnitId = unit->unitInstanceId;
@@ -218,6 +222,13 @@ void SearchUnitPopup::HandleUnitFound(AOE_STRUCTURES::STRUCT_UNIT_BASE *unit) {
 	text += buffer;
 
 	this->edtResultInfo->SetText(text.c_str());
+
+	AOE_STRUCTURES::PLAYER::SelectOneUnit(GetControlledPlayerStruct_Settings(), unit, true);
+
+	// To allow game zone to actually move to the correct location, we need to make it active (and then activate our popup back)
+	AOE_METHODS::UI_BASE::SetCurrentPanel(scenarioEditorScreenName, 0);
+	AOE_METHODS::UI_BASE::SetCurrentPanel(this->GetScreenName().c_str(), 1);
+	
 }
 
 

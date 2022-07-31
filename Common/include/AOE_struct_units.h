@@ -215,7 +215,7 @@ namespace AOE_STRUCTURES {
 	class STRUCT_UNIT_BASE {
 	public:
 		unsigned long int checksum;
-		long int unitInstanceId; // Can be negative (temporary units like smoke). Can be something else (or unused?) (seen for flare, type=10)
+		long int unitInstanceId; // Can be negative (for recyclable units). Can be something else (or unused?) (seen for flare, type=10)
 		STRUCT_UNITDEF_BASE *unitDefinition; // +8. Unit definition (model). Living units can have a dedicated unit definition.
 		STRUCT_PLAYER *ptrStructPlayer;
 		STRUCT_GRAPHICS *pCurrentGraphics; // +10. Note: contains speed multiplier to handle altitude change !

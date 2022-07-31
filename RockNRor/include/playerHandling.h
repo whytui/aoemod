@@ -38,8 +38,7 @@ namespace PLAYER {
 
 void ClearSelectedUnits(AOE_STRUCTURES::STRUCT_PLAYER *player);
 
-// select: if true, add unit to selection. If false, remove from selection.
-bool SelectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool select);
+bool SelectUnit(AOE_STRUCTURES::STRUCT_PLAYER *player, AOE_STRUCTURES::STRUCT_UNIT_BASE *unit, bool playSound);
 
 // Return the matching score element
 // Warning: May return NULL.

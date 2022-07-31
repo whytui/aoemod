@@ -44,7 +44,7 @@ protected:
 	void DoSearch();
 
 private:
-	long int lastResultUnitId;
+	long int lastResultUnitId; // INT_MIN means 'not set'
 	AOE_STRUCTURES::STRUCT_UNIT_BASE *foundUnit;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnOK;
 	AOE_STRUCTURES::STRUCT_UI_BUTTON *btnDoSearch;

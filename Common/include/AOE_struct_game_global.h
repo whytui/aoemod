@@ -173,7 +173,7 @@ namespace AOE_STRUCTURES {
 		unsigned short int unknown_062;
 		STRUCT_COLOR_DEF **colorsTable; // +64. Color table. The table size in bytes is colorCount*4. Each DWORD is a pointer to color definition;
 		long int seqUnitId; // +68. Sequence for unit instance IDs (for creatable only ?). *Next* object ID.
-		long int unitIdSeqForTempUnits; // +6C. Used for "negative" units.
+		long int unitIdSeqForTempUnits; // +6C. Used for "negative" units. This is negative. *Next* (negative) unit id.
 		// +0x70
 		long int forcedNextUnitId; // Unsure. Forced when loading a scenario.
 		char forceUseSpecifiedUnitId; // +74. If set (temporarily), use "+70" as next unitInstanceId instead of reading sequence.
@@ -188,7 +188,7 @@ namespace AOE_STRUCTURES {
 		long int numberObjects; // +8C
 		// +0x90
 		long int unitPointersListSize; // Size (elem count) of the ptrUnitPointersList Array. "MaxNumberObjects"
-		STRUCT_UNIT_BASE **negativeUnitPointersList; // +94. array of DWORDS. Temporary units array (units with negative IDs) ?
+		STRUCT_UNIT_BASE **negativeUnitPointersList; // +94. array of DWORDS. Temporary units array (units with negative IDs). Index is "-unitID". Cf 0x5206D8
 		long int numberNegativeObjects; // +98
 		long int negativeUnitPointersListSize; // +9C. Size of x+0x94 array. Default=1000. "MaxNumberNegativeObjects".
 		// +0xA0
@@ -260,6 +260,21 @@ namespace AOE_STRUCTURES {
 				return NULL;
 			}
 			return ptrUnitPointersList[unitId];
+		}
+		// Returns a tempoary unit structure from its *negative* ID. Only works for negative IDs.
+		STRUCT_UNIT_BASE *GetUnitFromNegativeId(long int unitId) const
+		{
+			if ((unitId >= 0) || (-unitId >= -this->unitIdSeqForTempUnits) || (-unitId >= this->negativeUnitPointersListSize)) {
+				return NULL;
+			}
+			return this->negativeUnitPointersList[-unitId];
+		}
+		// Returns a unit structure from its ID. Works for both positive and negative (recyclable) unit IDs.
+		STRUCT_UNIT_BASE *GetUnitFromIdAll(long int unitId) const {
+			if (unitId >= 0) {
+				return this->GetUnitFromId(unitId);
+			}
+			return this->GetUnitFromNegativeId(unitId);
 		}
 		bool IsCheckSumValid() const { return (this->checksum == CHECKSUM_GAME_GLOBAL1) || (this->checksum == CHECKSUM_GAME_GLOBAL2); }
 	};

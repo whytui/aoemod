@@ -224,7 +224,7 @@ namespace AOE_STRUCTURES
 		long int languageDLLHelp; // +98. Id for help message
 		long int languageDLLHotKeyText; // +9C. Id for help page
 		long int hotKey; // +A0.
-		char recyclable; // +A4. old AGE3 name="unselectable". Indicate NOT to delete unit object on death, so the memory can be reused. Typically for flares, dead units. Do NOT use for living(70), building(80), tree(90) = not supported.
+		char recyclable; // +A4. old AGE3 name="unselectable". Indicate NOT to delete unit object on death, so the memory can be reused. Typically for flares, dead units. Do NOT use for living(70), building(80), tree(90) = not supported. 'recyclable' units should have negative instance ID.
 		char isSpottableResource; // +A5. 1 for resources other than animals and farms. Such units are added to some player list, but what for ? "Auto gatherable" in AGE3.
 		UNIT_DEATH_DOPPLEGANGER_CREATION_MODE createDopplegangerModeOnDeath; // +A6. If 1/2, create a doppleganger for ALL players (if explored & under fog) when dying. Values: 0=none, 1=afterResourceDepleted(fish, bushes, mines), 2=ImmediateAtDeath(trees).
 		PLAYER_GATHERABLE_RESOURCE_CATEGORIES spottableResourceCategory; // +A7. Related to isSpottableResource ? (resource)Gather group in AGE3. cf 0x517166.
